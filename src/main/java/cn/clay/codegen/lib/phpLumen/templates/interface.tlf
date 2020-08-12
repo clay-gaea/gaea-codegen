@@ -1,0 +1,16 @@
+<?php namespace [(${namespace})]\Interface;
+
+use [(${namespace})]\Entity\Department;
+use [(${namespace})]\Entity\DepartmentFilter;
+use [(${groupNamespace})]\Common\Libs\Page;
+
+interface [(${api.getClassname()})]Interface
+{[# th:each="operation : ${api.operations}"]
+    /**
+     * [(${operation.summary})][# th:each="parameter : ${operation.getParameters()}"]
+     * @param $[(${parameter.name})] [(${config.getTypeBySchema(parameter.schema)})][(${parameter.getIn()=='body' && parameter.required==false}?'|NULL':'')] [(${parameter.description})][/]
+     * @return [(${config.getTypeBySchema(operation.returnSchema)})][(${operation.returnSchema.get$ref()!=null}?'|NULL':'')]
+     */
+    public function [(${operation.operationId})]([# th:each="parameter : ${operation.getParameters()}"][(${parameter.getIn()=='body' && parameter.required==false}?'?':'')][(${config.getTypeBySchema(parameter.schema)})] $[(${parameter.name})][(${parameter.defaultVal!=null?" = " + parameter.defaultVal : ""})][(${parameterStat.last?"":", "})][/]) : [(${operation.returnSchema.get$ref()!=null}?'?':'')][(${config.getTypeBySchema(operation.returnSchema)})];
+
+[/]}

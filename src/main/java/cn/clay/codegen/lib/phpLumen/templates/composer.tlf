@@ -1,0 +1,20 @@
+{
+    "name": "[(${groupId})]/[(${artifactId})]",
+    "description": "[(${description})]",
+    "type": "library",
+    "license": "MIT",
+    "version": "[(${version})]",
+    "authors": [
+        {
+            "name": "chenlei6",
+            "email": "itta163@163.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "\\[(${#strings.replace(namespace, '\\', '\\\\')})]\\": "src/"
+        }
+    },
+    "require": {
+    }
+}

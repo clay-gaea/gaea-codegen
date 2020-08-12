@@ -1,0 +1,14 @@
+<?php namespace [(${namespace})]\Entity;
+
+use [(${groupNamespace})]\Common\Libs\Entity;[# th:each="import : ${config.getImportsByModel(model)}"]
+use [(${import})];[/]
+
+/**[# th:each="property : ${model.getProperties()}"]
+ * @property $[(${property.name})] [(${config.getTypeBySchema(property.schema)})] [(${property.title?property.title+" ":""})][(${property.description}?:'')][/]
+ */
+class [(${model.getClassname()})] extends Entity
+{
+    protected $attributes = [[# th:each="property : ${model.getProperties()}"]
+        '[(${property.name})]' => null,[/]
+    ];
+}

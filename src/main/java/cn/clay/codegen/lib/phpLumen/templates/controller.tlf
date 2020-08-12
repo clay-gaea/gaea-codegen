@@ -1,0 +1,26 @@
+<?php namespace [(${namespace})]\Controller;
+
+use Laravel\Lumen\Routing\Controller;
+use [(${groupNamespace})]\Common\Libs\Page;
+use [(${namespace})]\Entity\User;
+use [(${namespace})]\Entity\UserFilter;
+use [(${namespace})]\Interface\UserInterface;
+
+class [(${api.getClassname()})]Controller extends Controller
+{
+    /**
+     * @var [(${api.getClassname()})]Interface
+     */
+    protected $[(${api.getParamName()})]Service;
+
+    public function __construct([(${api.getClassname()})]Interface $[(${api.getParamName()})]Service)
+    {
+        $this->[(${api.getParamName()})]Service = $[(${api.getParamName()})]Service;
+    }
+    [# th:each="operation : ${api.operations}"]
+    public function [(${operation.operationId})]([# th:each="parameter : ${operation.getParameters()}"][(${parameter.getIn()=='body' && parameter.required==false}?'?':'')][(${config.getTypeBySchema(parameter.schema)})] $[(${parameter.name})][(${parameter.defaultVal!=null?" = " + parameter.defaultVal : ""})][(${parameterStat.last?"":", "})][/])
+    {
+        return $this->[(${api.getParamName()})]Service->[(${operation.operationId})]($user);
+    }
+
+[/]}
