@@ -1,0 +1,35 @@
+<?php namespace [(${namespace})];
+
+use [(${groupNamespace})]\Common\Middleware\BindingMiddleware;
+use [(${groupNamespace})]\Common\Middleware\ResponseMiddleware;
+use Illuminate\Support\ServiceProvider as BaseServiceProvider;
+use Laravel\Lumen\Routing\Router;
+
+/**
+ * [(${artifactId})]
+ * @version [(${version})]
+ */
+class ServiceProvider extends BaseServiceProvider
+{
+    public function register()
+    {
+        $this->registerRoutes();
+        $this->app->routeMiddleware([
+            'msBinding' => BindingMiddleware::class,
+            'msResponse' => ResponseMiddleware::class,
+        ]);
+    }
+
+    protected function registerRoutes()
+    {
+        $this->app->router->group([
+            'middleware' => ['msBinding', 'msResponse'],
+            'namespace' => __NAMESPACE__ . '\Controller',
+        ], function (Router $router) {
+            [# th:each="api : ${apis}"]
+            // [(${api.description})][# th:each="operation : ${api.operations}"]
+            $router->[(${#strings.toLowerCase(operation.httpMethod)})]('[(${operation.path})]', ['uses' => '[(${api.getClassname()})]Controller@[(${operation.operationId})]', 'name' => '[(${operation.summary})]']);[/]
+
+[/]        });
+    }
+}
