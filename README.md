@@ -24,6 +24,7 @@ Codegen是一个很棒的注意，可以帮我们建议自己团队的代码规�
     - 打包测试发布监控更加平滑
 
 这里有个Demo，帮你了解 gaea-codegen 干了什么。
+https://github.com/clay-gaea/demo-php-lumen
 
 ## 参考资料
 - http://www.thymeleaf.org

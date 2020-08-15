@@ -25,6 +25,7 @@ I have a few more ideas, but I do not have time to realize them all. Let me list
     - Packaging test release monitoring is smoother
 
 Here's a Demo to help you understand what gaea-codegen does.
+https://github.com/clay-gaea/demo-php-lumen
 
 ## Resources
 - http://www.thymeleaf.org
