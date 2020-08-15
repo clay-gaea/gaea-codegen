@@ -186,11 +186,35 @@ public abstract class CodegenConfigPhp extends CodegenConfig {
      * @return String
      */
     public String getTypeBySchema(Schema<?> schema) {
-        String baseType = getBaseTypeBySchema(schema);
+        Schema<?> tmpSchema = schema;
+        if (schema instanceof ComposedSchema) {
+            /*
+             * oneof/anyof 只取第一个返回
+             * allof 只取第一个返回
+             */
+            List<Schema> list1 = ((ComposedSchema) schema).getOneOf();
+            List<Schema> list2 = ((ComposedSchema) schema).getAnyOf();
+            List<Schema> list3 = ((ComposedSchema) schema).getAllOf();
+
+            if (list1 != null) {
+                tmpSchema = list1.get(0);
+            } else if (list2 != null) {
+                tmpSchema = list2.get(0);
+            } else if (list3 != null) {
+                tmpSchema = list3.get(0);
+            } else {
+                System.out.println("Warning " + schema);
+                return "";
+            }
+        } else if (schema instanceof ArraySchema) {
+            tmpSchema = ((ArraySchema) schema).getItems();
+        }
+
+        String type = getBaseType(tmpSchema);
         if (schema instanceof ArraySchema) {
-            return baseType + "[]";
+            return type + "[]";
         } else {
-            return baseType;
+            return type;
         }
     }
 
@@ -209,15 +233,18 @@ public abstract class CodegenConfigPhp extends CodegenConfig {
             List<Schema> list2 = ((ComposedSchema) schema).getAnyOf();
             List<Schema> list3 = ((ComposedSchema) schema).getAllOf();
 
-            String baseType;
             if (list1 != null) {
                 return list1.get(0);
             } else if (list2 != null) {
                 return list2.get(0);
-            } else if (list3 != null) {
-                return list3.get(0);
+            } else if (
+                    list3 != null
+                            && list3.get(list3.size() - 1).getProperties() != null
+                            && list3.get(list3.size() - 1).getProperties().containsKey("list")
+            ) {
+                return getBaseSchema((Schema<?>) list3.get(list3.size() - 1).getProperties().get("list"));
             } else {
-                System.out.println("Warning " + schema);
+                System.out.println("Warning: getBaseSchema " + schema);
                 return null;
             }
         } else if (schema instanceof ArraySchema) {
