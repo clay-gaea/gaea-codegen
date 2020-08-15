@@ -27,7 +27,7 @@ class [(${api.getClassname()})]Client extends HttpClient implements [(${api.getC
                 'query' => [[# th:each="parameter : ${operation.getParameters()}"][# th:if="${parameter.getIn() == 'query'}"]
                     '[(${parameter.name})]' => $[(${parameter.name})],[/][/]
                 ],[# th:each="parameter : ${operation.getParameters()}"][# th:if="${parameter.getIn() == 'body'}"]
-                'json' => $[(${parameter.name})]->toArray(),[/][/]
+                'json' => [(${parameter.getIn()=='body' && parameter.required==false ? "!$"+parameter.name+" ? [] : ":""})]$[(${parameter.name})]->toArray(),[/][/]
             ],[# th:if="${ operation.returnSchema.getType() == null }"]
             [$this, '[(${ operation.returnIsArray ? "toArray" : ( config.getTypeBySchema(operation.returnSchema) == "Page" ? "toPage" : "toEntity" ) })]'],
             [(${config.getBaseTypeBySchema(operation.returnSchema)})]::class[/]
