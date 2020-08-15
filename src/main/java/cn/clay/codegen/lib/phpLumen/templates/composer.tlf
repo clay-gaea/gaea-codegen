@@ -12,7 +12,7 @@
     ],
     "autoload": {
         "psr-4": {
-            "\\[(${#strings.replace(namespace, '\\', '\\\\')})]\\": "src/"
+            "[(${#strings.replace(namespace, '\\', '\\\\')})]\\": "src/"
         }
     },
     "require": {

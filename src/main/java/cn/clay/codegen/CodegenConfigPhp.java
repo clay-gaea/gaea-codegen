@@ -126,32 +126,57 @@ public abstract class CodegenConfigPhp extends CodegenConfig {
         List<String> rt = new ArrayList<>();
 
         for (CodegenProperty property : model.getProperties()) {
-            Schema<?> schema = property.schema;
-            if (property.schema instanceof ComposedSchema) {
-                List<Schema> list1 = ((ComposedSchema) property.schema).getOneOf();
-                List<Schema> list2 = ((ComposedSchema) property.schema).getAnyOf();
-                List<Schema> list3 = ((ComposedSchema) property.schema).getAllOf();
-
-                String baseType;
-                if (list1 != null) {
-                    schema = list1.get(0);
-                } else if (list2 != null) {
-                    schema = list2.get(0);
-                } else if (list3 != null) {
-                    schema = list3.get(0);
-                } else {
-                    continue;
-                }
-            } else if (property.schema instanceof ArraySchema) {
-                schema = ((ArraySchema) property.schema).getItems();
-            }
-
-            if (schema.get$ref() == null) {
-                continue;
-            }
-            rt.add(getNamespace() + "\\Entity\\" + getBaseType(schema));
+            String ipt = getImportBySchema(property.schema);
+            if (!ipt.isEmpty()) rt.add(ipt);
         }
+
         return rt;
+    }
+
+    public List<String> getImportsByApi(CodegenApi api) {
+        Set<String> rt = new HashSet<>();
+        for (CodegenOperation operation : api.operations) {
+            for (CodegenParameter parameter : operation.getParameters()) {
+                String ipt = getImportBySchema(parameter.schema);
+                if (!ipt.isEmpty()) rt.add(ipt);
+            }
+
+            String ipt = getImportBySchema(operation.returnSchema);
+            if (!ipt.isEmpty()) rt.add(ipt);
+        }
+
+        return new ArrayList<>(rt);
+    }
+
+    public String getImportBySchema(Schema<?> schema) {
+        Schema<?> schemaTmp = schema;
+        if (schema instanceof ComposedSchema) {
+            List<Schema> list1 = ((ComposedSchema) schema).getOneOf();
+            List<Schema> list2 = ((ComposedSchema) schema).getAnyOf();
+            List<Schema> list3 = ((ComposedSchema) schema).getAllOf();
+
+            if (list1 != null) {
+                schemaTmp = list1.get(0);
+            } else if (list2 != null) {
+                schemaTmp = list2.get(0);
+            } else if (list3 != null) {
+                schemaTmp = list3.get(0);
+            } else {
+                return "";
+            }
+        } else if (schema instanceof ArraySchema) {
+            schemaTmp = ((ArraySchema) schema).getItems();
+        }
+
+        if (schemaTmp.get$ref() == null) {
+            return "";
+        }
+
+        String baseType = getBaseType(schemaTmp);
+        if (baseType.equals("Page")) {
+            return getGroupNamespace() + "\\Common\\Libs\\Page";
+        }
+        return getNamespace() + "\\Entity\\" + getBaseType(schemaTmp);
     }
 
     /**
@@ -161,6 +186,20 @@ public abstract class CodegenConfigPhp extends CodegenConfig {
      * @return String
      */
     public String getTypeBySchema(Schema<?> schema) {
+        String baseType = getBaseTypeBySchema(schema);
+        if (schema instanceof ArraySchema) {
+            return baseType + "[]";
+        } else {
+            return baseType;
+        }
+    }
+
+    public String getBaseTypeBySchema(Schema<?> schema) {
+        Schema<?> baseSchema = getBaseSchema(schema);
+        return baseSchema != null ? getBaseType(baseSchema) : "";
+    }
+
+    public Schema<?> getBaseSchema(Schema<?> schema) {
         if (schema instanceof ComposedSchema) {
             /*
              * oneof/anyof 只取第一个返回
@@ -172,21 +211,19 @@ public abstract class CodegenConfigPhp extends CodegenConfig {
 
             String baseType;
             if (list1 != null) {
-                baseType = getBaseType(list1.get(0));
+                return list1.get(0);
             } else if (list2 != null) {
-                baseType = getBaseType(list2.get(0));
+                return list2.get(0);
             } else if (list3 != null) {
-                baseType = getBaseType(list3.get(0));
+                return list3.get(0);
             } else {
-                baseType = "";
                 System.out.println("Warning " + schema);
+                return null;
             }
-
-            return baseType;
         } else if (schema instanceof ArraySchema) {
-            return getBaseType(((ArraySchema) schema).getItems()) + "[]";
+            return ((ArraySchema) schema).getItems();
         } else {
-            return getBaseType(schema);
+            return schema;
         }
     }
 

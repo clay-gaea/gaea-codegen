@@ -1,0 +1,37 @@
+<?php namespace [(${namespace})]\Client;
+
+use [(${groupNamespace})]\Common\Libs\HttpClient;
+use [(${groupNamespace})]\Common\Libs\HttpTrait;
+use [(${namespace})]\Service\UserInterface;[# th:each="import : ${config.getImportsByApi(api)}"]
+use [(${import})];[/]
+
+class [(${api.getClassname()})]Client extends HttpClient implements [(${api.getClassname()})]Interface
+{
+    protected $artifactId = '[(${artifactId})]';
+
+    protected $apis = [[# th:each="operation : ${api.operations}"]
+        '[(${operation.operationId})]' => ['method' => '[(${operation.httpMethod})]', 'path' => '[(${operation.path})]'],[/]
+    ];
+[# th:each="operation : ${api.operations}"]
+    public function [(${operation.operationId})]([# th:each="parameter : ${operation.getParameters()}"][(${parameter.getIn()=='body' && parameter.required==false}?'?':'')][(${config.getTypeBySchema(parameter.schema)})] $[(${parameter.name})][(${parameter.defaultVal!=null?" = " + parameter.defaultVal : ""})][(${parameterStat.last?"":", "})][/]): [(${operation.returnSchema.get$ref()!=null}?'?':'')][(${operation.returnIsArray?"array":config.getTypeBySchema(operation.returnSchema)})]
+    {
+        return $this->[(${operation.operationId})]Async([# th:each="parameter : ${operation.getParameters()}"]$[(${parameter.name})][(${parameterStat.last?"":", "})][/])->wait();
+    }
+
+[/][# th:each="operation : ${api.operations}"]    public function [(${operation.operationId})]Async([# th:each="parameter : ${operation.getParameters()}"][(${parameter.getIn()=='body' && parameter.required==false}?'?':'')][(${config.getTypeBySchema(parameter.schema)})] $[(${parameter.name})][(${parameter.defaultVal!=null?" = " + parameter.defaultVal : ""})][(${parameterStat.last?"":", "})][/])
+    {
+        $api = $this->apis['[(${operation.operationId})]'];
+        return $this->requestAsync(
+            $api['method'], $api['path'],
+            [
+                'query' => [[# th:each="parameter : ${operation.getParameters()}"][# th:if="${parameter.getIn() == 'query'}"]
+                    '[(${parameter.name})]' => $[(${parameter.name})],[/][/]
+                ],[# th:each="parameter : ${operation.getParameters()}"][# th:if="${parameter.getIn() == 'body'}"]
+                'json' => $[(${parameter.name})]->toArray(),[/][/]
+            ],[# th:if="${ operation.returnSchema.getType() == null }"]
+            [$this, '[(${ operation.returnIsArray ? "toArray" : ( config.getTypeBySchema(operation.returnSchema) == "Page" ? "toPage" : "toEntity" ) })]'],
+            [(${config.getBaseTypeBySchema(operation.returnSchema)})]::class[/]
+        );
+    }
+
+[/]}

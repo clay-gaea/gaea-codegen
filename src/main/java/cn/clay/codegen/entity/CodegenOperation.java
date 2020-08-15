@@ -3,6 +3,7 @@ package cn.clay.codegen.entity;
 import cn.clay.codegen.Helper;
 import io.swagger.oas.models.Operation;
 import io.swagger.oas.models.PathItem;
+import io.swagger.oas.models.media.ArraySchema;
 import io.swagger.oas.models.media.MediaType;
 import io.swagger.oas.models.media.Schema;
 import io.swagger.oas.models.parameters.Parameter;
@@ -20,10 +21,10 @@ public class CodegenOperation {
     public String operationId;
     public String summary;
     public String description;
-    public String defaultVal;
 
     public Schema<?> returnSchema;
     public String returnDescription;
+    public boolean returnIsArray;
 
 //    public List<CodegenParameter> bodyParams = new ArrayList<>();
 //    public List<CodegenParameter> pathParams = new ArrayList<>();
@@ -47,6 +48,7 @@ public class CodegenOperation {
                 for (Map.Entry<String, MediaType> mediaTypeEntry : apiResponseEntry.getValue().getContent().entrySet()) {
                     if (mediaTypeEntry.getKey().equals("application/json")) {
                         this.returnSchema = mediaTypeEntry.getValue().getSchema();
+                        this.returnIsArray = (this.returnSchema instanceof ArraySchema);
                     }
                 }
             }

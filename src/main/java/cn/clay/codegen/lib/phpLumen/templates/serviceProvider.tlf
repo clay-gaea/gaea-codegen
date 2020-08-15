@@ -3,7 +3,9 @@
 use [(${groupNamespace})]\Common\Middleware\BindingMiddleware;
 use [(${groupNamespace})]\Common\Middleware\ResponseMiddleware;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
-use Laravel\Lumen\Routing\Router;
+use Laravel\Lumen\Routing\Router;[# th:each="api : ${apis}"]
+use [(${namespace})]\Service\[(${api.getClassname()})]Interface;[/][# th:each="api : ${apis}"]
+use [(${namespace})]\Client\[(${api.getClassname()})]Client;[/]
 
 /**
  * [(${artifactId})]
@@ -13,15 +15,32 @@ class ServiceProvider extends BaseServiceProvider
 {
     public function register()
     {
-        $this->registerRoutes();
+        $path = $this->app->configPath("gaea_services.php");
+        $this->mergeConfigFrom($path, 'gaea_services');
+
+        $this->registerClient();
+        $config = config('gaea_services.[(${artifactId})]');
+        if ($config && $config['service'] ?? false) {
+            $this->registerService();
+        }
+
+        $implements = $config ? $config['implements'] ?? [] : [];
+        foreach ($implements as $interface => $implement) {
+            $this->app->bind($interface, $implement);
+        }
+    }
+
+    public function registerClient()
+    {[# th:each="api : ${apis}"]
+        $this->app->bindIf([(${api.getClassname()})]Interface::class, [(${api.getClassname()})]Client::class);[/]
+    }
+
+    public function registerService()
+    {
         $this->app->routeMiddleware([
             'msBinding' => BindingMiddleware::class,
             'msResponse' => ResponseMiddleware::class,
         ]);
-    }
-
-    protected function registerRoutes()
-    {
         $this->app->router->group([
             'middleware' => ['msBinding', 'msResponse'],
             'namespace' => __NAMESPACE__ . '\Controller',
