@@ -105,18 +105,6 @@ public abstract class CodegenConfigPhp extends CodegenConfig {
     }
 
     /**
-     * TODO 参数类型，以及返回类型
-     */
-
-    public String getBaseTypeByParameter(CodegenParameter parameter) {
-        return "";
-    }
-
-    public String getImportsByParameter(CodegenParameter parameter) {
-        return "";
-    }
-
-    /**
      * 获取的实体模型的外部包
      *
      * @param model CodegenModel
