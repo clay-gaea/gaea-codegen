@@ -11,8 +11,8 @@ import io.swagger.oas.models.OpenAPI;
  * <p>
  * Controller.php
  */
-public class CodegenConfig extends CodegenConfigPhp {
-    public CodegenConfig(OpenAPI openAPI) {
+public class PhpLumenCodegenConfig extends CodegenConfigPhp {
+    public PhpLumenCodegenConfig(OpenAPI openAPI) {
         super(openAPI);
 
         templateFiles.add(new TemplateFile("composer.tlf", "composer.json"));
@@ -38,7 +38,7 @@ public class CodegenConfig extends CodegenConfigPhp {
 
     @Override
     public String getTemplateDir() {
-        return "/Users/chenlei/Dev/Gaea/gaea-codegen/src/main/java/cn/clay/codegen/lib/phpLumen/templates";
+        return "src/main/java/cn/clay/codegen/lib/phpLumen/templates";
     }
 
 }

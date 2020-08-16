@@ -16,7 +16,7 @@ class [(${api.getClassname()})]Controller extends Controller
         $this->[(${api.getParamName()})]Service = $[(${api.getParamName()})]Service;
     }
     [# th:each="operation : ${api.operations}"]
-    public function [(${operation.operationId})]([# th:each="parameter : ${operation.getParameters()}"][(${parameter.getIn()=='body' && parameter.required==false}?'?':'')][(${config.getTypeBySchema(parameter.schema)})] $[(${parameter.name})][(${parameter.defaultVal!=null?" = " + parameter.defaultVal : ""})][(${parameterStat.last?"":", "})][/])
+    public function [(${operation.operationId})]([# th:each="parameter : ${operation.getParameters()}"][(${parameter.getIn()=='body' && parameter.required==false}?'?':'')][(${config.getClassBySchema(parameter.schema)})] $[(${parameter.name})][(${parameter.defaultVal!=null?" = " + parameter.defaultVal : ""})][(${parameterStat.last?"":", "})][/])
     {
         return $this->[(${api.getParamName()})]Service->[(${operation.operationId})]([# th:each="parameter : ${operation.getParameters()}"]$[(${parameter.name})][(${parameterStat.last?"":", "})][/]);
     }

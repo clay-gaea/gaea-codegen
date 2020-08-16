@@ -4,7 +4,7 @@ use [(${groupNamespace})]\Common\Libs\Entity;[# th:each="import : ${config.getIm
 use [(${import})];[/]
 
 /**[# th:each="property : ${model.getProperties()}"]
- * @property $[(${property.name})] [(${config.getTypeBySchema(property.schema)})] [(${property.title?property.title+" ":""})][(${property.description}?:'')][/]
+ * @property $[(${property.name})] [(${config.getClassBySchema(property.schema)})] [(${property.title?property.title+" ":""})][(${property.description}?:'')][/]
  */
 class [(${model.getClassname()})] extends Entity
 {

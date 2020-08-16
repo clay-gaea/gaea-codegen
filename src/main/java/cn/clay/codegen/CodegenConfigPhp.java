@@ -1,19 +1,12 @@
 package cn.clay.codegen;
 
 import cn.clay.codegen.entity.*;
-import com.fasterxml.jackson.databind.util.ArrayBuilders;
-import com.google.common.collect.Collections2;
 import io.swagger.oas.models.OpenAPI;
 import io.swagger.oas.models.media.ArraySchema;
 import io.swagger.oas.models.media.ComposedSchema;
-import io.swagger.oas.models.media.MediaType;
 import io.swagger.oas.models.media.Schema;
-import io.swagger.oas.models.parameters.Parameter;
-import io.swagger.oas.models.parameters.RequestBody;
 
-import java.security.cert.Certificate;
 import java.util.*;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public abstract class CodegenConfigPhp extends CodegenConfig {
@@ -104,115 +97,43 @@ public abstract class CodegenConfigPhp extends CodegenConfig {
         return rtList;
     }
 
-    /**
-     * 获取的实体模型的外部包
-     *
-     * @param model CodegenModel
-     * @return List<String>
-     */
-    public List<String> getImportsByModel(CodegenModel model) {
-        List<String> rt = new ArrayList<>();
-
-        for (CodegenProperty property : model.getProperties()) {
-            String ipt = getImportBySchema(property.schema);
-            if (!ipt.isEmpty()) rt.add(ipt);
-        }
-
-        return rt;
-    }
-
-    public List<String> getImportsByApi(CodegenApi api) {
-        Set<String> rt = new HashSet<>();
-        for (CodegenOperation operation : api.operations) {
-            for (CodegenParameter parameter : operation.getParameters()) {
-                String ipt = getImportBySchema(parameter.schema);
-                if (!ipt.isEmpty()) rt.add(ipt);
-            }
-
-            String ipt = getImportBySchema(operation.returnSchema);
-            if (!ipt.isEmpty()) rt.add(ipt);
-        }
-
-        return new ArrayList<>(rt);
-    }
-
     public String getImportBySchema(Schema<?> schema) {
-        Schema<?> schemaTmp = schema;
-        if (schema instanceof ComposedSchema) {
-            List<Schema> list1 = ((ComposedSchema) schema).getOneOf();
-            List<Schema> list2 = ((ComposedSchema) schema).getAnyOf();
-            List<Schema> list3 = ((ComposedSchema) schema).getAllOf();
-
-            if (list1 != null) {
-                schemaTmp = list1.get(0);
-            } else if (list2 != null) {
-                schemaTmp = list2.get(0);
-            } else if (list3 != null) {
-                schemaTmp = list3.get(0);
-            } else {
-                return "";
-            }
-        } else if (schema instanceof ArraySchema) {
-            schemaTmp = ((ArraySchema) schema).getItems();
-        }
-
-        if (schemaTmp.get$ref() == null) {
+        if (schema.getType() != null) { // 基础类型
             return "";
         }
 
-        String baseType = getBaseType(schemaTmp);
-        if (baseType.equals("Page")) {
+        String baseClass = getBaseClassBySchema(schema);
+        if (baseClass.equals("Page")) {
             return getGroupNamespace() + "\\Common\\Libs\\Page";
         }
-        return getNamespace() + "\\Entity\\" + getBaseType(schemaTmp);
+        return getNamespace() + "\\Entity\\" + baseClass;
     }
 
     /**
-     * 获取属性的类型字符串
+     * 获取模板类基本 class 类型
+     */
+    public String getTemplateClassBySchema(Schema<?> schema) {
+        String baseClass = getBaseClassBySchema(schema);
+        if (baseClass.equals("Page") && schema instanceof ComposedSchema) {
+            List<Schema> list3 = ((ComposedSchema) schema).getAllOf();
+            if (list3 != null && list3.get(list3.size() - 1).getProperties() != null && list3.get(list3.size() - 1).getProperties().containsKey("list")) {
+                return getBaseClassBySchema((Schema<?>) list3.get(list3.size() - 1).getProperties().get("list"));
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * 通过 Schema 获取基础类型
      *
-     * @param schema Schema<?>
+     * @param schema Schema
      * @return String
      */
-    public String getTypeBySchema(Schema<?> schema) {
-        Schema<?> tmpSchema = schema;
-        if (schema instanceof ComposedSchema) {
-            /*
-             * oneof/anyof 只取第一个返回
-             * allof 只取第一个返回
-             */
-            List<Schema> list1 = ((ComposedSchema) schema).getOneOf();
-            List<Schema> list2 = ((ComposedSchema) schema).getAnyOf();
-            List<Schema> list3 = ((ComposedSchema) schema).getAllOf();
-
-            if (list1 != null) {
-                tmpSchema = list1.get(0);
-            } else if (list2 != null) {
-                tmpSchema = list2.get(0);
-            } else if (list3 != null) {
-                tmpSchema = list3.get(0);
-            } else {
-                System.out.println("Warning " + schema);
-                return "";
-            }
-        } else if (schema instanceof ArraySchema) {
-            tmpSchema = ((ArraySchema) schema).getItems();
-        }
-
-        String type = getBaseType(tmpSchema);
+    public String getBaseClassBySchema(Schema<?> schema) {
         if (schema instanceof ArraySchema) {
-            return type + "[]";
-        } else {
-            return type;
-        }
-    }
-
-    public String getBaseTypeBySchema(Schema<?> schema) {
-        Schema<?> baseSchema = getBaseSchema(schema);
-        return baseSchema != null ? getBaseType(baseSchema) : "";
-    }
-
-    public Schema<?> getBaseSchema(Schema<?> schema) {
-        if (schema instanceof ComposedSchema) {
+            return getBaseClassBySchema(((ArraySchema) schema).getItems());
+        } else if (schema instanceof ComposedSchema) {
             /*
              * oneof/anyof 只取第一个返回
              * allof 只取第一个返回
@@ -222,34 +143,20 @@ public abstract class CodegenConfigPhp extends CodegenConfig {
             List<Schema> list3 = ((ComposedSchema) schema).getAllOf();
 
             if (list1 != null) {
-                return list1.get(0);
+                return getBaseClassBySchema(list1.get(0));
             } else if (list2 != null) {
-                return list2.get(0);
-            } else if (
-                    list3 != null
-                            && list3.get(list3.size() - 1).getProperties() != null
-                            && list3.get(list3.size() - 1).getProperties().containsKey("list")
-            ) {
-                return getBaseSchema((Schema<?>) list3.get(list3.size() - 1).getProperties().get("list"));
+                return getBaseClassBySchema(list2.get(0));
+            } else if (list3 != null) {
+                return getBaseClassBySchema(list3.get(0));
             } else {
-                System.out.println("Warning: getBaseSchema " + schema);
+                System.out.println("Warning: getBaseClassBySchema " + schema);
                 return null;
             }
-        } else if (schema instanceof ArraySchema) {
-            return ((ArraySchema) schema).getItems();
+        } else if (schema.get$ref() != null) {
+            String $ref = schema.get$ref();
+            int pos = $ref.lastIndexOf("/");
+            return $ref.substring(pos + 1);
         } else {
-            return schema;
-        }
-    }
-
-    /**
-     * 基础类型转化
-     *
-     * @param schema Schema<?>
-     * @return String
-     */
-    public String getBaseType(Schema<?> schema) {
-        if (schema.getType() != null) {
             switch (schema.getType()) {
                 case "boolean":
                     return "bool";
@@ -262,16 +169,20 @@ public abstract class CodegenConfigPhp extends CodegenConfig {
                 case "array":
                 case "object":
                 default:
-                    System.out.println("Warning: getBaseType " + schema);
+                    System.out.println("Warning: getBaseClassBySchema " + schema);
                     return "";
             }
-        } else if (schema.get$ref() != null) {
-            String $ref = schema.get$ref();
-            int pos = $ref.lastIndexOf("/");
-            return $ref.substring(pos + 1);
-        } else {
-            System.out.println("Warning: getBaseType " + schema);
-            return "";
         }
+    }
+
+    /**
+     * 通过 Schema 获取类型
+     *
+     * @param schema Schema
+     * @return String
+     */
+    public String getClassBySchema(Schema<?> schema) {
+        String baseClass = getBaseClassBySchema(schema);
+        return schema instanceof ArraySchema ? baseClass + "[]" : baseClass;
     }
 }

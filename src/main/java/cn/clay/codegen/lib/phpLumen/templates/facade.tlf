@@ -5,7 +5,7 @@ use [(${namespace})]\Service\[(${api.getClassname()})]Interface;[# th:each="impo
 use [(${import})];[/]
 
 /**[# th:each="operation : ${api.operations}"]
- * @method static [(${config.getTypeBySchema(operation.returnSchema)})][(${operation.returnSchema.get$ref()!=null}?'|NULL':'')] [(${operation.operationId})]([# th:each="parameter : ${operation.getParameters()}"][(${parameter.getIn()=='body' && parameter.required==false}?'?':'')][(${config.getTypeBySchema(parameter.schema)})] $[(${parameter.name})][(${parameter.defaultVal!=null?" = " + parameter.defaultVal : ""})][(${parameterStat.last?"":", "})][/]) [(${operation.summary})]
+ * @method static [(${config.getClassBySchema(operation.returnSchema)})][(${operation.returnSchema.get$ref()!=null}?'|NULL':'')] [(${operation.operationId})]([# th:each="parameter : ${operation.getParameters()}"][(${parameter.getIn()=='body' && parameter.required==false}?'?':'')][(${config.getClassBySchema(parameter.schema)})] $[(${parameter.name})][(${parameter.defaultVal!=null?" = " + parameter.defaultVal : ""})][(${parameterStat.last?"":", "})][/]) [(${operation.summary})]
 [/] */
 class [(${api.getClassname()})]Facade extends Facade
 {

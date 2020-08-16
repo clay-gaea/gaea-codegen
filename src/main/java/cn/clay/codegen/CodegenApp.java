@@ -2,7 +2,8 @@ package cn.clay.codegen;
 
 import cn.clay.codegen.entity.CodegenApi;
 import cn.clay.codegen.entity.CodegenModel;
-import cn.clay.codegen.lib.phpLumen.CodegenConfig;
+import cn.clay.codegen.lib.phpLumen.PhpLumenCodegenConfig;
+import cn.clay.codegen.lib.javaSpring.JavaSpringCodegenConfig;
 import io.swagger.oas.models.OpenAPI;
 import io.swagger.parser.v3.OpenAPIV3Parser;
 import org.thymeleaf.TemplateEngine;
@@ -45,7 +46,7 @@ public class CodegenApp {
      * 5.钩子方法
      */
     public static void main(String[] args) {
-        String pathJson = "/Users/chenlei/Dev/Gaea/gaea-codegen/src/main/resources/uac-simple.json";
+        String pathJson = "src/main/resources/uac-simple.json";
 //        String pathYaml = "/Users/chenlei/Dev/Gaea/gaea-codegen/src/main/resources/uac-simple.yaml";
 
         /*
@@ -63,8 +64,8 @@ public class CodegenApp {
 
         OpenAPI openAPI = (new OpenAPIV3Parser()).read(pathJson);
         assert openAPI != null;
-        CodegenConfig codegenConfig = new CodegenConfig(openAPI);
-        codegenConfig.setOutputDir("/Users/chenlei/Dev/Gaea/gaea-codegen/dist");
+        CodegenConfig codegenConfig = new PhpLumenCodegenConfig(openAPI);
+        codegenConfig.setOutputDir("./dist");
 
         // 清理目录
         deleteDir(codegenConfig.getOutputDir());

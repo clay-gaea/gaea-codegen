@@ -127,6 +127,24 @@ abstract class CodegenConfig {
         return "Com\\Clay";
     }
 
+    abstract public String getSchemaClassName(Schema<?> schema);
+
+    public String getFilePath(TemplateFile templateFile) {
+        return getOutputDir() + File.separator + File.separator + templateFile.getOutput();
+    }
+
+    public String getApiFilePath(TemplateFile templateFile, CodegenApi api) {
+        return getOutputDir() + File.separator + templateFile.getPrefix() + templateFile.output + api.getClassname() + templateFile.getSuffix();
+    }
+
+    public String getModelFilePath(TemplateFile templateFile, CodegenModel model) {
+        return getOutputDir() + File.separator + templateFile.getPrefix() + templateFile.getOutput() + model.getClassname() + templateFile.getSuffix();
+    }
+
+    final public String getTemplatePath(TemplateFile templateFile) {
+        return getTemplateDir() + File.separator + templateFile.getTemplate();
+    }
+
     public List<CodegenApi> getApis() {
         if (apis == null) {
             apis = new ArrayList<>();
@@ -170,23 +188,42 @@ abstract class CodegenConfig {
         return models;
     }
 
-    abstract public String getSchemaClassName(Schema<?> schema);
+    /**
+     * 获取参数 class 类型
+     */
+    abstract public String getClassBySchema(Schema<?> schema);
 
-    abstract public List<String> getSchemaImports(Schema<?> schema);
+    abstract public String getBaseClassBySchema(Schema<?> schema);
 
-    public String getFilePath(TemplateFile templateFile) {
-        return getOutputDir() + File.separator + File.separator + templateFile.getOutput();
+    /**
+     * 获取 imports 函数
+     */
+    public List<String> getImportsByModel(CodegenModel model) {
+        List<String> rt = new ArrayList<>();
+
+        for (CodegenProperty property : model.getProperties()) {
+            String ipt = getImportBySchema(property.schema);
+            if (!ipt.isEmpty()) rt.add(ipt);
+        }
+
+        return rt;
     }
 
-    public String getApiFilePath(TemplateFile templateFile, CodegenApi api) {
-        return getOutputDir() + File.separator + templateFile.getPrefix() + templateFile.output + api.getClassname() + templateFile.getSuffix();
+    public List<String> getImportsByApi(CodegenApi api) {
+        Set<String> rt = new HashSet<>();
+        for (CodegenOperation operation : api.operations) {
+            for (CodegenParameter parameter : operation.getParameters()) {
+                String ipt = getImportBySchema(parameter.schema);
+                if (!ipt.isEmpty()) rt.add(ipt);
+            }
+
+            String ipt = getImportBySchema(operation.returnSchema);
+            if (!ipt.isEmpty()) rt.add(ipt);
+        }
+
+        return new ArrayList<>(rt);
     }
 
-    public String getModelFilePath(TemplateFile templateFile, CodegenModel model) {
-        return getOutputDir() + File.separator + templateFile.getPrefix() + templateFile.getOutput() + model.getClassname() + templateFile.getSuffix();
-    }
-
-    final public String getTemplatePath(TemplateFile templateFile) {
-        return getTemplateDir() + File.separator + templateFile.getTemplate();
-    }
+    // 通过参数 Schema, 获取依赖项
+    abstract public String getImportBySchema(Schema<?> schema);
 }
