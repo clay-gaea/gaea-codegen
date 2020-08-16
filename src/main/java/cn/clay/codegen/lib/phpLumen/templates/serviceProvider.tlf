@@ -1,5 +1,6 @@
 <?php namespace [(${namespace})];
 
+use [(${groupNamespace})]\Common\Middleware\AuthMiddleware;
 use [(${groupNamespace})]\Common\Middleware\BindingMiddleware;
 use [(${groupNamespace})]\Common\Middleware\ResponseMiddleware;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
@@ -37,12 +38,14 @@ class ServiceProvider extends BaseServiceProvider
 
     public function registerService()
     {
+        $auth = config('gaea_services.[(${artifactId})].auth', 0);
         $this->app->routeMiddleware([
             'msBinding' => BindingMiddleware::class,
             'msResponse' => ResponseMiddleware::class,
+            'auth' => AuthMiddleware::class
         ]);
         $this->app->router->group([
-            'middleware' => ['msBinding', 'msResponse'],
+            'middleware' => $auth ? ['msBinding', 'msResponse', 'auth'] : ['msBinding', 'msResponse'],
             'namespace' => __NAMESPACE__ . '\Controller',
         ], function (Router $router) {
             [# th:each="api : ${apis}"]
