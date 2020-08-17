@@ -127,8 +127,6 @@ abstract class CodegenConfig {
         return "Com\\Clay";
     }
 
-    abstract public String getSchemaClassName(Schema<?> schema);
-
     public String getFilePath(TemplateFile templateFile) {
         return getOutputDir() + File.separator + File.separator + templateFile.getOutput();
     }
@@ -194,6 +192,8 @@ abstract class CodegenConfig {
     abstract public String getClassBySchema(Schema<?> schema);
 
     abstract public String getBaseClassBySchema(Schema<?> schema);
+
+    abstract public String getTemplateClassBySchema(Schema<?> schema);
 
     /**
      * 获取 imports 函数

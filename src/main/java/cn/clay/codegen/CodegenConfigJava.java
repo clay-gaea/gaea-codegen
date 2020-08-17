@@ -1,23 +1,22 @@
 package cn.clay.codegen;
 
-import cn.clay.codegen.entity.*;
+import cn.clay.codegen.entity.CodegenApi;
+import cn.clay.codegen.entity.CodegenModel;
 import io.swagger.oas.models.OpenAPI;
 import io.swagger.oas.models.media.ArraySchema;
 import io.swagger.oas.models.media.ComposedSchema;
 import io.swagger.oas.models.media.Schema;
+import org.thymeleaf.util.StringUtils;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.io.File;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-public abstract class CodegenConfigPhp extends CodegenConfig {
-    public CodegenConfigPhp(OpenAPI openAPI) {
+public abstract class CodegenConfigJava extends CodegenConfig {
+
+    public CodegenConfigJava(OpenAPI openAPI) {
         super(openAPI);
-
-        this.artifactId = this.openAPI.getInfo().getTitle().toLowerCase();
-    }
-
-    public String getNamespace() {
-        return this.getGroupNamespace() + "\\" + Helper.camelize(this.artifactId, false);
     }
 
     @Override
@@ -28,7 +27,6 @@ public abstract class CodegenConfigPhp extends CodegenConfig {
         map.put("artifactId", artifactId);
         map.put("version", getVersion());
         map.put("description", this.openAPI.getInfo().getDescription());
-        map.put("namespace", getNamespace());
         map.put("openAPI", openAPI);
         map.put("groupNamespace", this.getGroupNamespace());
 
@@ -52,39 +50,13 @@ public abstract class CodegenConfigPhp extends CodegenConfig {
         return map;
     }
 
-    public String getImportBySchema(Schema<?> schema) {
-        if (schema.getType() != null) { // 基础类型
-            return "";
-        }
-
+    @Override
+    public String getClassBySchema(Schema<?> schema) {
         String baseClass = getBaseClassBySchema(schema);
-        if (baseClass.equals("Page")) {
-            return getGroupNamespace() + "\\Common\\Libs\\Page";
-        }
-        return getNamespace() + "\\Entity\\" + baseClass;
+        return schema instanceof ArraySchema ? "List<" + baseClass + ">" : baseClass;
     }
 
-    /**
-     * 获取模板类基本 class 类型
-     */
-    public String getTemplateClassBySchema(Schema<?> schema) {
-        String baseClass = getBaseClassBySchema(schema);
-        if (baseClass.equals("Page") && schema instanceof ComposedSchema) {
-            List<Schema> list3 = ((ComposedSchema) schema).getAllOf();
-            if (list3 != null && list3.get(list3.size() - 1).getProperties() != null && list3.get(list3.size() - 1).getProperties().containsKey("list")) {
-                return getBaseClassBySchema((Schema<?>) list3.get(list3.size() - 1).getProperties().get("list"));
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * 通过 Schema 获取基础类型
-     *
-     * @param schema Schema
-     * @return String
-     */
+    @Override
     public String getBaseClassBySchema(Schema<?> schema) {
         if (schema instanceof ArraySchema) {
             return getBaseClassBySchema(((ArraySchema) schema).getItems());
@@ -112,15 +84,20 @@ public abstract class CodegenConfigPhp extends CodegenConfig {
             int pos = $ref.lastIndexOf("/");
             return $ref.substring(pos + 1);
         } else {
+            boolean bool = true;
             switch (schema.getType()) {
                 case "boolean":
-                    return "bool";
+                    return "Boolean";
                 case "string":
-                    return "string";
+                    return "String";
                 case "integer":
-                    return "int";
+                    return "Integer";
                 case "number":
-                    return schema.getFormat().equals("float") || schema.getFormat().equals("double") ? "float" : "int";
+                    if (schema.getFormat().equals("float")) {
+                        return "Float";
+                    } else if (schema.getFormat().equals("double")) {
+                        return "Double";
+                    }
                 case "array":
                 case "object":
                 default:
@@ -130,14 +107,23 @@ public abstract class CodegenConfigPhp extends CodegenConfig {
         }
     }
 
-    /**
-     * 通过 Schema 获取类型
-     *
-     * @param schema Schema
-     * @return String
-     */
-    public String getClassBySchema(Schema<?> schema) {
-        String baseClass = getBaseClassBySchema(schema);
-        return schema instanceof ArraySchema ? baseClass + "[]" : baseClass;
+    @Override
+    public String getTemplateClassBySchema(Schema<?> schema) {
+        return null;
+    }
+
+    @Override
+    public String getImportBySchema(Schema<?> schema) {
+        return null;
+    }
+
+    @Override
+    public String getApiFilePath(TemplateFile templateFile, CodegenApi api) {
+        return getOutputDir() + "/src/main/java/" + StringUtils.replace(groupId, ".", File.separator) + File.separator + StringUtils.replace(artifactId, "-", "_") + File.separator + templateFile.getPrefix() + templateFile.output + api.getClassname() + templateFile.getSuffix();
+    }
+
+    @Override
+    public String getModelFilePath(TemplateFile templateFile, CodegenModel model) {
+        return getOutputDir() + "/src/main/java/" + StringUtils.replace(groupId, ".", File.separator) + File.separator + StringUtils.replace(artifactId, "-", "_") + File.separator + templateFile.getPrefix() + templateFile.getOutput() + model.getClassname() + templateFile.getSuffix();
     }
 }

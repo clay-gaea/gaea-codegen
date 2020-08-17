@@ -64,7 +64,7 @@ public class CodegenApp {
 
         OpenAPI openAPI = (new OpenAPIV3Parser()).read(pathJson);
         assert openAPI != null;
-        CodegenConfig codegenConfig = new PhpLumenCodegenConfig(openAPI);
+        CodegenConfig codegenConfig = new JavaSpringCodegenConfig(openAPI);
         codegenConfig.setOutputDir("./dist");
 
         // 清理目录
