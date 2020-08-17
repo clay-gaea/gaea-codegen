@@ -6,9 +6,11 @@ import io.swagger.oas.models.Operation;
 import io.swagger.oas.models.PathItem;
 import io.swagger.oas.models.media.Schema;
 import io.swagger.oas.models.tags.Tag;
+import org.thymeleaf.util.StringUtils;
 
 import java.io.File;
 import java.util.*;
+import java.util.stream.Collectors;
 
 abstract class CodegenConfig {
     OpenAPI openAPI;
@@ -199,31 +201,30 @@ abstract class CodegenConfig {
      * 获取 imports 函数
      */
     public List<String> getImportsByModel(CodegenModel model) {
-        List<String> rt = new ArrayList<>();
+        Set<String> rt = new HashSet<>();
 
         for (CodegenProperty property : model.getProperties()) {
-            String ipt = getImportBySchema(property.schema);
-            if (!ipt.isEmpty()) rt.add(ipt);
+            rt.addAll(getImportsBySchema(property.schema));
         }
 
-        return rt;
+        return rt.parallelStream()
+                .filter(item -> !item.isEmpty() && !item.contains(StringUtils.replace(artifactId, "-", "_")))
+                .collect(Collectors.toList());
     }
 
     public List<String> getImportsByApi(CodegenApi api) {
         Set<String> rt = new HashSet<>();
         for (CodegenOperation operation : api.operations) {
             for (CodegenParameter parameter : operation.getParameters()) {
-                String ipt = getImportBySchema(parameter.schema);
-                if (!ipt.isEmpty()) rt.add(ipt);
+                rt.addAll(getImportsBySchema(parameter.schema));
             }
 
-            String ipt = getImportBySchema(operation.returnSchema);
-            if (!ipt.isEmpty()) rt.add(ipt);
+            rt.addAll(getImportsBySchema(operation.returnSchema));
         }
 
-        return new ArrayList<>(rt);
+        return rt.parallelStream().filter(item -> !item.isEmpty()).collect(Collectors.toList());
     }
 
     // 通过参数 Schema, 获取依赖项
-    abstract public String getImportBySchema(Schema<?> schema);
+    abstract public List<String> getImportsBySchema(Schema<?> schema);
 }

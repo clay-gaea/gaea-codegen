@@ -1,0 +1,11 @@
+package [(${groupId})].[(${#strings.replace(artifactId, "-", "_")})].entity;
+
+import lombok.Data;[# th:each="import : ${config.getImportsByModel(model)}"]
+import [(${import})];[/]
+
+@Data
+public class [(${model.getClassname()})] {
+[# th:each="property : ${model.getProperties()}"]
+  private [(${config.getClassBySchema(property.schema)})] [(${property.name})]; // [(${property.title?property.title+" ":""})][(${property.description}?:'')]
+
+[/]}

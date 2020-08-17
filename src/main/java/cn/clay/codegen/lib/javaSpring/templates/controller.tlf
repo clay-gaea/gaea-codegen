@@ -1,0 +1,22 @@
+package [(${groupId})].[(${#strings.replace(artifactId, "-", "_")})].controller;
+
+import [(${groupId})].[(${#strings.replace(artifactId, "-", "_")})].service.[(${api.getClassname()})]Service;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;[# th:each="import : ${config.getImportsByApi(api)}"]
+import [(${import})];[/]
+
+@RestController
+@Slf4j
+public class [(${api.getClassname()})]Controller {
+
+    @Autowired
+    private [(${api.getClassname()})]Service [(${api.getParamName()})]Service;
+[# th:each="operation : ${api.operations}"]
+    @RequestMapping("[(${operation.path})]")
+    @ResponseBody
+    public [(${config.getClassBySchema(operation.returnSchema)})] [(${operation.operationId})]([# th:each="parameter : ${operation.getParameters()}"][(${config.getClassBySchema(parameter.schema)})] [(${parameter.name})][(${parameterStat.last?"":", "})][/]) {
+        return [(${api.getParamName()})]Service.[(${operation.operationId})]([# th:each="parameter : ${operation.getParameters()}"][(${parameter.name})][(${parameterStat.last?"":", "})][/]);
+    }
+
+[/]}

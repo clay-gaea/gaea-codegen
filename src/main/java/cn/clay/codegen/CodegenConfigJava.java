@@ -1,7 +1,6 @@
 package cn.clay.codegen;
 
-import cn.clay.codegen.entity.CodegenApi;
-import cn.clay.codegen.entity.CodegenModel;
+import cn.clay.codegen.entity.*;
 import io.swagger.oas.models.OpenAPI;
 import io.swagger.oas.models.media.ArraySchema;
 import io.swagger.oas.models.media.ComposedSchema;
@@ -9,9 +8,8 @@ import io.swagger.oas.models.media.Schema;
 import org.thymeleaf.util.StringUtils;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public abstract class CodegenConfigJava extends CodegenConfig {
 
@@ -53,7 +51,14 @@ public abstract class CodegenConfigJava extends CodegenConfig {
     @Override
     public String getClassBySchema(Schema<?> schema) {
         String baseClass = getBaseClassBySchema(schema);
-        return schema instanceof ArraySchema ? "List<" + baseClass + ">" : baseClass;
+        if (schema instanceof ArraySchema) {
+            return "List<" + baseClass + ">";
+        } else if (baseClass.equals("Page")) {
+            String templateClass = getTemplateClassBySchema(schema);
+            return "Page<" + templateClass + ">";
+        }
+
+        return baseClass;
     }
 
     @Override
@@ -109,12 +114,39 @@ public abstract class CodegenConfigJava extends CodegenConfig {
 
     @Override
     public String getTemplateClassBySchema(Schema<?> schema) {
+        if (schema instanceof ComposedSchema) {
+            List<Schema> list3 = ((ComposedSchema) schema).getAllOf();
+            if (list3 != null && list3.get(0).get$ref().endsWith("Page") && list3.get(list3.size() - 1).getProperties() != null && list3.get(list3.size() - 1).getProperties().containsKey("list")) {
+                return getBaseClassBySchema((Schema<?>) list3.get(list3.size() - 1).getProperties().get("list"));
+            }
+        }
+
         return null;
     }
 
-    @Override
-    public String getImportBySchema(Schema<?> schema) {
-        return null;
+    protected Boolean isBaseType(String type) {
+        return Arrays.asList("Boolean", "String", "Integer").contains(type);
+    }
+
+    public List<String> getImportsBySchema(Schema<?> schema) {
+        Set<String> rt = new HashSet<>();
+
+        String strClass = getClassBySchema(schema);
+        String baseClass = getBaseClassBySchema(schema);
+        String templateClass = getTemplateClassBySchema(schema);
+        if (strClass.startsWith("Page<")) {
+            rt.add(groupId + ".common.lib.Page");
+            rt.add(groupId + "." + StringUtils.replace(artifactId, "-", "_") + "." + "entity." + templateClass);
+        } else if (strClass.startsWith("List<")) {
+            rt.add("java.util.List");
+            if (!isBaseType(baseClass)) {
+                rt.add(groupId + "." + StringUtils.replace(artifactId, "-", "_") + "." + "entity." + baseClass);
+            }
+        } else if (!isBaseType(strClass)) {
+            rt.add(groupId + "." + StringUtils.replace(artifactId, "-", "_") + "." + "entity." + strClass);
+        }
+
+        return new ArrayList<>(rt);
     }
 
     @Override

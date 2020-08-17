@@ -52,16 +52,19 @@ public abstract class CodegenConfigPhp extends CodegenConfig {
         return map;
     }
 
-    public String getImportBySchema(Schema<?> schema) {
+    public List<String> getImportsBySchema(Schema<?> schema) {
+        List<String> rt = new ArrayList<>();
         if (schema.getType() != null) { // 基础类型
-            return "";
+            return rt;
         }
 
         String baseClass = getBaseClassBySchema(schema);
         if (baseClass.equals("Page")) {
-            return getGroupNamespace() + "\\Common\\Libs\\Page";
+            rt.add(getGroupNamespace() + "\\Common\\Libs\\Page");
+        } else {
+            rt.add(getNamespace() + "\\Entity\\" + baseClass);
         }
-        return getNamespace() + "\\Entity\\" + baseClass;
+        return rt;
     }
 
     /**

@@ -1,0 +1,15 @@
+package [(${groupId})].[(${#strings.replace(artifactId, "-", "_")})].client;
+
+import lombok.extern.slf4j.Slf4j;[# th:each="import : ${config.getImportsByApi(api)}"]
+import [(${import})];[/]
+
+// TODO 默认参数
+@Slf4j
+public class [(${api.getClassname()})]Client {
+[# th:each="operation : ${api.operations}"]
+    // [(${operation.summary})]
+    public [(${config.getClassBySchema(operation.returnSchema)})] [(${operation.operationId})]([# th:each="parameter : ${operation.getParameters()}"][(${config.getClassBySchema(parameter.schema)})] [(${parameter.name})][(${parameterStat.last?"":", "})][/]) {
+        return null;
+    }
+
+[/]}
