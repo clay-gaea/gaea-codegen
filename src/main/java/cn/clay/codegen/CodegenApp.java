@@ -2,7 +2,8 @@ package cn.clay.codegen;
 
 import cn.clay.codegen.entity.CodegenApi;
 import cn.clay.codegen.entity.CodegenModel;
-import cn.clay.codegen.lib.phpLumen.PhpLumenCodegenConfig;
+import cn.clay.codegen.entity.TemplateFile;
+import cn.clay.codegen.lib.CodegenConfig;
 import cn.clay.codegen.lib.javaSpring.JavaSpringCodegenConfig;
 import io.swagger.oas.models.OpenAPI;
 import io.swagger.parser.v3.OpenAPIV3Parser;

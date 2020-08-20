@@ -1,5 +1,7 @@
-package cn.clay.codegen;
+package cn.clay.codegen.lib;
 
+import cn.clay.codegen.Helper;
+import cn.clay.codegen.entity.TemplateFile;
 import cn.clay.codegen.entity.*;
 import io.swagger.oas.models.OpenAPI;
 import io.swagger.oas.models.Operation;

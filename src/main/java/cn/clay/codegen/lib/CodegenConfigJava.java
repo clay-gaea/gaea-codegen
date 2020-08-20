@@ -1,5 +1,6 @@
-package cn.clay.codegen;
+package cn.clay.codegen.lib;
 
+import cn.clay.codegen.entity.TemplateFile;
 import cn.clay.codegen.entity.*;
 import io.swagger.oas.models.OpenAPI;
 import io.swagger.oas.models.media.ArraySchema;
@@ -9,7 +10,6 @@ import org.thymeleaf.util.StringUtils;
 
 import java.io.File;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public abstract class CodegenConfigJava extends CodegenConfig {
 

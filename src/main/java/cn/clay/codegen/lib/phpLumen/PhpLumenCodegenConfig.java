@@ -1,7 +1,7 @@
 package cn.clay.codegen.lib.phpLumen;
 
-import cn.clay.codegen.CodegenConfigPhp;
-import cn.clay.codegen.TemplateFile;
+import cn.clay.codegen.lib.CodegenConfigPhp;
+import cn.clay.codegen.entity.TemplateFile;
 import io.swagger.oas.models.OpenAPI;
 
 /**

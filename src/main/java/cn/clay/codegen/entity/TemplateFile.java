@@ -1,4 +1,4 @@
-package cn.clay.codegen;
+package cn.clay.codegen.entity;
 
 import java.io.File;
 

@@ -1,7 +1,7 @@
 package cn.clay.codegen.lib.javaSpring;
 
-import cn.clay.codegen.CodegenConfigJava;
-import cn.clay.codegen.TemplateFile;
+import cn.clay.codegen.lib.CodegenConfigJava;
+import cn.clay.codegen.entity.TemplateFile;
 import io.swagger.oas.models.OpenAPI;
 
 public class JavaSpringCodegenConfig extends CodegenConfigJava {

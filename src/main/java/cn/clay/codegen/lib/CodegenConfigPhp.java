@@ -1,5 +1,6 @@
-package cn.clay.codegen;
+package cn.clay.codegen.lib;
 
+import cn.clay.codegen.Helper;
 import cn.clay.codegen.entity.*;
 import io.swagger.oas.models.OpenAPI;
 import io.swagger.oas.models.media.ArraySchema;
@@ -7,7 +8,6 @@ import io.swagger.oas.models.media.ComposedSchema;
 import io.swagger.oas.models.media.Schema;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public abstract class CodegenConfigPhp extends CodegenConfig {
     public CodegenConfigPhp(OpenAPI openAPI) {
