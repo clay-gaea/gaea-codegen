@@ -1,7 +1,5 @@
 package cn.clay.codegen.entity;
 
-import java.io.File;
-
 public class TemplateFile {
     protected String template = "";
     protected String output = "";

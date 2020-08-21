@@ -1,19 +1,15 @@
 openapi: 3.0.1
 
 info:
-  title: uac-simple
+  title: uac-simple-api
   description: 用户中台简版
   version: 1.0.0
 
 servers:
-  - url: http://dev-uac-s.clay.com/api/v1.1
+  - url: 'http://uac.test/api/v1'
     description: 开发地址
-  - url: http://test-uac-s.clay.com/api/v1.1
+  - url: 'http://uac.test.20379.cn/api/v1'
     description: 测试地址
-
-externalDocs:
-  description: 项目文档
-  url: https://openapi-generator.tech
 
 tags:
   - name: User
@@ -22,14 +18,18 @@ tags:
     description: 部门
   - name: Resource
     description: 资源
+  - name: Relation
+    description: 关联
 
 paths:
-  ##### User #####
   /user/list:
     post:
       summary: 用户列表
       operationId: queryUserList
+      tags:
+        - User
       requestBody:
+        required: false
         content:
           application/json:
             schema:
@@ -44,7 +44,7 @@ paths:
             default: 1000
             maximum: 10000
       responses:
-        200:
+        '200':
           description: 成功
           content:
             application/json:
@@ -59,6 +59,7 @@ paths:
       tags:
         - User
       requestBody:
+        required: false
         content:
           application/json:
             schema:
@@ -79,7 +80,7 @@ paths:
             format: int32
             default: 1
       responses:
-        200:
+        '200':
           description: 成功
           content:
             application/json:
@@ -104,12 +105,12 @@ paths:
             schema:
               $ref: '#/components/schemas/User'
       responses:
-        200:
+        '200':
           description: 成功
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                type: integer
   /user/find:
     get:
       summary: 用户信息
@@ -124,7 +125,7 @@ paths:
             type: integer
             format: int32
       responses:
-        200:
+        '200':
           description: Success
           content:
             application/json:
@@ -149,12 +150,12 @@ paths:
             schema:
               $ref: '#/components/schemas/User'
       responses:
-        200:
+        '200':
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                type: boolean
   /user/delete:
     delete:
       summary: 删除用户
@@ -169,14 +170,13 @@ paths:
             type: integer
             format: int32
       responses:
-        200:
+        '200':
           description: 成功
           content:
             application/json:
               schema:
                 type: boolean
 
-  ##### Department #####
   /department/list:
     post:
       summary: 部门列表
@@ -184,6 +184,7 @@ paths:
       tags:
         - Department
       requestBody:
+        required: false
         content:
           application/json:
             schema:
@@ -198,7 +199,7 @@ paths:
             default: 1000
             maximum: 10000
       responses:
-        200:
+        '200':
           description: 成功
           content:
             application/json:
@@ -213,6 +214,7 @@ paths:
       tags:
         - Department
       requestBody:
+        required: false
         content:
           application/json:
             schema:
@@ -233,7 +235,7 @@ paths:
             format: int32
             default: 1
       responses:
-        200:
+        '200':
           description: 成功
           content:
             application/json:
@@ -258,7 +260,7 @@ paths:
             schema:
               $ref: '#/components/schemas/Department'
       responses:
-        200:
+        '200':
           description: 成功
           content:
             application/json:
@@ -278,7 +280,7 @@ paths:
             type: integer
             format: int32
       responses:
-        200:
+        '200':
           description: Success
           content:
             application/json:
@@ -303,7 +305,7 @@ paths:
             schema:
               $ref: '#/components/schemas/Department'
       responses:
-        200:
+        '200':
           description: 成功
           content:
             application/json:
@@ -323,14 +325,13 @@ paths:
             type: integer
             format: int32
       responses:
-        200:
+        '200':
           description: 成功
           content:
             application/json:
               schema:
                 type: boolean
 
-  ##### Resource #####
   /resource/list:
     post:
       summary: 资源列表
@@ -338,6 +339,7 @@ paths:
       tags:
         - Resource
       requestBody:
+        required: false
         content:
           application/json:
             schema:
@@ -352,7 +354,7 @@ paths:
             default: 1000
             maximum: 10000
       responses:
-        200:
+        '200':
           description: 成功
           content:
             application/json:
@@ -367,6 +369,7 @@ paths:
       tags:
         - Resource
       requestBody:
+        required: false
         content:
           application/json:
             schema:
@@ -387,7 +390,7 @@ paths:
             format: int32
             default: 1
       responses:
-        200:
+        '200':
           description: 成功
           content:
             application/json:
@@ -412,7 +415,7 @@ paths:
             schema:
               $ref: '#/components/schemas/Resource'
       responses:
-        200:
+        '200':
           description: 成功
           content:
             application/json:
@@ -432,7 +435,7 @@ paths:
             type: integer
             format: int32
       responses:
-        200:
+        '200':
           description: 成功
           content:
             application/json:
@@ -457,7 +460,7 @@ paths:
             schema:
               $ref: '#/components/schemas/Resource'
       responses:
-        200:
+        '200':
           description: 成功
           content:
             application/json:
@@ -477,13 +480,75 @@ paths:
             type: integer
             format: int32
       responses:
-        200:
+        '200':
           description: 成功
           content:
             application/json:
               schema:
                 type: boolean
 
+  /relation/createDeptRes:
+    post:
+      tags:
+        - Relation
+      operationId: createDeptRes
+      summary: 关联-部门资源
+      description: 多个部门 与 多个资源 关联
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: ["deptIds", "resIds"]
+              properties:
+                deptIds:
+                  description: 部门IDS
+                  type: array
+                  items:
+                    type: integer
+                resIds:
+                  description: 资源IDS
+                  type: array
+                  items:
+                    type: integer
+      responses:
+        200:
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: boolean
+  /relation/createDeptUser:
+    post:
+      tags:
+        - Relation
+      operationId: createDeptUser
+      summary: 关联-部门用户
+      description: 多个部门 与 多个人员 关联
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: ["deptIds", "userIds"]
+              properties:
+                deptIds:
+                  description: 部门IDS
+                  type: array
+                  items:
+                    type: integer
+                userIds:
+                  description: 用户IDS
+                  type: array
+                  items:
+                    type: integer
+      responses:
+        200:
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: boolean
 components:
   schemas:
     User:
@@ -529,19 +594,6 @@ components:
           type: string
           format: datetime
           readOnly: true
-        departments:
-          readOnly: true
-          description: 所在部门
-          type: array
-          items:
-            $ref: '#/components/schemas/Department'
-        resources:
-          readOnly: true
-          description: 直接权限
-          type: array
-          items:
-            $ref: '#/components/schemas/Resource'
-
     Department:
       title: 部门
       type: object
@@ -575,19 +627,6 @@ components:
           type: string
           format: datetime
           readOnly: true
-        users:
-          readOnly: true
-          description: 所有员工
-          type: array
-          items:
-            $ref: '#/components/schemas/User'
-        resources:
-          readOnly: true
-          description: 所有权限
-          type: array
-          items:
-            $ref: '#/components/schemas/Resource'
-
     Resource:
       title: 资源(权限)
       type: object
@@ -618,10 +657,6 @@ components:
           type: integer
           format: int32
           description: 父级ID
-        appId:
-          type: integer
-          format: int32
-          description: 应用ID
         sort:
           type: integer
           format: int32
@@ -638,18 +673,6 @@ components:
           type: string
           format: datetime
           readOnly: true
-        departments:
-          readOnly: true
-          type: array
-          items:
-            $ref: '#/components/schemas/Department'
-        users:
-          readOnly: true
-          type: array
-          items:
-            $ref: '#/components/schemas/User'
-
-    ##### 筛选 #####
     UserFilter:
       title: 用户筛选
       type: object
@@ -686,14 +709,6 @@ components:
           items:
             type: string
             format: datetime
-        relations:
-          type: array
-          items:
-            type: string
-            enum:
-              - departments
-              - resources
-
     DepartmentFilter:
       title: 部门筛选
       type: object
@@ -703,13 +718,34 @@ components:
           items:
             type: integer
             format: int64
-        relations:
+        name:
+          type: string
+          description: 名称模糊匹配
+        leaderId:
+          type: integer
+          format: int64
+          description: 负责人
+        pId:
+          type: integer
+          format: int64
+          description: 父级ID
+        status:
+          type: integer
+          format: int64
+          description: 1启用0禁用
+        bSort:
+          type: integer
+          description: 1排序0不排序
+        createdAtRange:
           type: array
           items:
             type: string
-            enum:
-              - users
-              - resources
+            format: datetime
+        updatedAtRange:
+          type: array
+          items:
+            type: string
+            format: datetime
 
     ResourceFilter:
       title: 资源筛选
@@ -720,8 +756,40 @@ components:
           items:
             type: integer
             format: int64
+        name:
+          type: string
+          description: 名称模糊匹配
+        type:
+          type: integer
+          format: int64
+          description: 类型
+        default:
+          type: integer
+          format: int64
+          description: 默认开启
+        status:
+          type: integer
+          format: int64
+          description: 1启用0禁用
+        pId:
+          type: integer
+          format: int64
+          description: 父级ID
+        bSort:
+          type: integer
+          format: int64
+          description: 是否排序
+        createdAtRange:
+          type: array
+          items:
+            type: string
+            format: datetime
+        updatedAtRange:
+          type: array
+          items:
+            type: string
+            format: datetime
 
-    ##### 公共组件 #####
     Page:
       title: Page
       type: object

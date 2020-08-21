@@ -5,6 +5,7 @@ import io.swagger.oas.models.Operation;
 import io.swagger.oas.models.PathItem;
 import io.swagger.oas.models.media.ArraySchema;
 import io.swagger.oas.models.media.MediaType;
+import io.swagger.oas.models.media.ObjectSchema;
 import io.swagger.oas.models.media.Schema;
 import io.swagger.oas.models.parameters.Parameter;
 import io.swagger.oas.models.parameters.RequestBody;
@@ -25,10 +26,8 @@ public class CodegenOperation {
     public Schema<?> returnSchema;
     public String returnDescription;
     public boolean returnIsArray;
-
-//    public List<CodegenParameter> bodyParams = new ArrayList<>();
-//    public List<CodegenParameter> pathParams = new ArrayList<>();
-//    public List<CodegenParameter> queryParams = new ArrayList<>();
+    // TODO 使用 Parameter 类代替
+    public CodegenParameter returnParameter;
 
     List<CodegenParameter> parameters;
 
@@ -53,6 +52,7 @@ public class CodegenOperation {
                 }
             }
         }
+        this.returnParameter = new CodegenParameter(operation.getResponses());
 
         if (this.returnSchema == null) {
             System.out.println("Warning: " + this.operationId + " return not defined");
@@ -71,7 +71,43 @@ public class CodegenOperation {
 
             RequestBody requestBody = operation.getRequestBody();
             if (requestBody != null) {
-                parameters.add(new CodegenParameter(requestBody));
+                Schema<?> tmpSchema = null;
+                for (Map.Entry<String, MediaType> mediaTypeEntry : requestBody.getContent().entrySet()) {
+                    if (mediaTypeEntry.getKey().equals("application/json")) {
+                        tmpSchema = mediaTypeEntry.getValue().getSchema();
+                        break;
+                    }
+                }
+
+                if (tmpSchema != null && tmpSchema.get$ref() != null) {
+                    int pos = tmpSchema.get$ref().lastIndexOf("/");
+                    String name = Helper.camelize(tmpSchema.get$ref().substring(pos + 1), true);
+                    parameters.add(new CodegenParameter(
+                            requestBody, tmpSchema, name,
+                            requestBody.getRequired() == null || requestBody.getRequired(),// 如果没有明确指定为 false，则理解是比填项
+                            requestBody.getDescription()
+                    ));
+                } else if (tmpSchema instanceof ObjectSchema) {
+                    for (Map.Entry<String, Schema> propertyEntry : tmpSchema.getProperties().entrySet()) {
+                        String name = propertyEntry.getKey();
+                        Schema<?> propertySchema = propertyEntry.getValue();
+                        Boolean required = (
+                                requestBody.getRequired() == null || requestBody.getRequired() // 如果没有明确指定为 false，则理解是比填项
+                        ) && tmpSchema.getRequired() != null && tmpSchema.getRequired().contains(name);
+                        parameters.add(
+                                new CodegenParameter(
+                                        requestBody, propertySchema,
+                                        name, required, propertySchema.getDescription()
+                                )
+                        );
+                    }
+                }
+            }
+
+            if (parameters.size() > 5) {
+                System.out.println("Warning: parameters of operation[" + operationId + "] must be less than or equal to five.");
+                parameters.clear();
+                return parameters;
             }
 
             parameters.sort(new Comparator<CodegenParameter>() {
@@ -112,5 +148,14 @@ public class CodegenOperation {
                 ", summary='" + summary + '\'' +
                 ", description='" + description + '\'' +
                 '}';
+    }
+
+    public Boolean containBodyParameters() {
+        for (CodegenParameter parameter : getParameters()) {
+            if (Arrays.asList("body", "bodyProperty").contains(parameter.getIn()))
+                return true;
+        }
+
+        return false;
     }
 }

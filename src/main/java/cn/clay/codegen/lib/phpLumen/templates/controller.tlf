@@ -2,7 +2,7 @@
 
 use Laravel\Lumen\Routing\Controller;[# th:each="import : ${config.getImportsByApi(api)}"]
 use [(${import})];[/]
-use [(${namespace})]\Service\UserInterface;
+use [(${namespace})]\Service\[(${api.getClassname()})]Interface;
 
 class [(${api.getClassname()})]Controller extends Controller
 {
@@ -16,7 +16,7 @@ class [(${api.getClassname()})]Controller extends Controller
         $this->[(${api.getParamName()})]Service = $[(${api.getParamName()})]Service;
     }
     [# th:each="operation : ${api.operations}"]
-    public function [(${operation.operationId})]([# th:each="parameter : ${operation.getParameters()}"][(${parameter.getIn()=='body' && parameter.required==false}?'?':'')][(${config.getClassBySchema(parameter.schema)})] $[(${parameter.name})][(${parameter.defaultVal!=null?" = " + parameter.defaultVal : ""})][(${parameterStat.last?"":", "})][/])
+    public function [(${operation.operationId})]([# th:each="parameter : ${operation.getParameters()}"][(${parameter.schema.get$ref!=null && parameter.required==false}?'?':'')][(${parameter.isArray()?'array':config.getClassBySchema(parameter.schema)})] $[(${parameter.name})][(${parameter.defaultVal!=null?" = " + parameter.defaultVal : ""})][(${parameterStat.last?"":", "})][/])
     {
         return $this->[(${api.getParamName()})]Service->[(${operation.operationId})]([# th:each="parameter : ${operation.getParameters()}"]$[(${parameter.name})][(${parameterStat.last?"":", "})][/]);
     }

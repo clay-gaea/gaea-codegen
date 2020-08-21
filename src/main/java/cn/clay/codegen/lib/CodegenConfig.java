@@ -136,7 +136,7 @@ abstract class CodegenConfig {
     }
 
     public String getApiFilePath(TemplateFile templateFile, CodegenApi api) {
-        return getOutputDir() + File.separator + templateFile.getPrefix() + templateFile.output + api.getClassname() + templateFile.getSuffix();
+        return getOutputDir() + File.separator + templateFile.getPrefix() + templateFile.getOutput() + api.getClassname() + templateFile.getSuffix();
     }
 
     public String getModelFilePath(TemplateFile templateFile, CodegenModel model) {

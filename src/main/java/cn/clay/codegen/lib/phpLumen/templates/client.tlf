@@ -13,12 +13,12 @@ class [(${api.getClassname()})]Client extends HttpClient implements [(${api.getC
         '[(${operation.operationId})]' => ['method' => '[(${operation.httpMethod})]', 'path' => '[(${operation.path})]'],[/]
     ];
 [# th:each="operation : ${api.operations}"]
-    public function [(${operation.operationId})]([# th:each="parameter : ${operation.getParameters()}"][(${parameter.getIn()=='body' && parameter.required==false}?'?':'')][(${config.getClassBySchema(parameter.schema)})] $[(${parameter.name})][(${parameter.defaultVal!=null?" = " + parameter.defaultVal : ""})][(${parameterStat.last?"":", "})][/]): [(${operation.returnSchema.get$ref()!=null}?'?':'')][(${operation.returnIsArray?"array":config.getClassBySchema(operation.returnSchema)})]
+    public function [(${operation.operationId})]([# th:each="parameter : ${operation.getParameters()}"][(${parameter.schema.get$ref!=null && parameter.required==false}?'?':'')][(${parameter.isArray()?'array':config.getClassBySchema(parameter.schema)})] $[(${parameter.name})][(${parameter.defaultVal!=null?" = " + parameter.defaultVal : ""})][(${parameterStat.last?"":", "})][/]): [(${operation.returnSchema.get$ref()!=null}?'?':'')][(${operation.returnIsArray?"array":config.getClassBySchema(operation.returnSchema)})]
     {
         return $this->[(${operation.operationId})]Async([# th:each="parameter : ${operation.getParameters()}"]$[(${parameter.name})][(${parameterStat.last?"":", "})][/])->wait();
     }
 
-[/][# th:each="operation : ${api.operations}"]    public function [(${operation.operationId})]Async([# th:each="parameter : ${operation.getParameters()}"][(${parameter.getIn()=='body' && parameter.required==false}?'?':'')][(${config.getClassBySchema(parameter.schema)})] $[(${parameter.name})][(${parameter.defaultVal!=null?" = " + parameter.defaultVal : ""})][(${parameterStat.last?"":", "})][/])
+[/][# th:each="operation : ${api.operations}"]    public function [(${operation.operationId})]Async([# th:each="parameter : ${operation.getParameters()}"][(${parameter.schema.get$ref!=null && parameter.required==false}?'?':'')][(${parameter.isArray()?'array':config.getClassBySchema(parameter.schema)})] $[(${parameter.name})][(${parameter.defaultVal!=null?" = " + parameter.defaultVal : ""})][(${parameterStat.last?"":", "})][/])
     {
         $api = $this->apis['[(${operation.operationId})]'];
         return $this->requestAsync(
