@@ -22,15 +22,17 @@ class [(${api.getClassname()})]Client extends HttpClient implements [(${api.getC
     {
         $api = $this->apis['[(${operation.operationId})]'];
         return $this->requestAsync(
-            $api['method'], $api['path'],
-            [
+            $api['method'], $api['path'], [# th:if="${operation.getParameters().size()>0}"]
+            [[# th:if="${operation.haveQueryParameter()}"]
                 'query' => [[# th:each="parameter : ${operation.getParameters()}"][# th:if="${parameter.getIn() == 'query'}"]
                     '[(${parameter.name})]' => $[(${parameter.name})],[/][/]
-                ],[# th:each="parameter : ${operation.getParameters()}"][# th:if="${parameter.getIn() == 'body'}"]
-                'json' => [(${parameter.getIn()=='body' && parameter.required==false ? "!$"+parameter.name+" ? [] : ":""})]$[(${parameter.name})]->toArray(),[/][/]
-            ],[# th:if="${ operation.returnSchema.getType() == null }"]
-            [$this, '[(${ operation.returnIsArray ? "toArray" : ( config.getClassBySchema(operation.returnSchema) == "Page" ? "toPage" : "toEntity" ) })]'],
-            [(${config.getTemplateClassBySchema(operation.returnSchema)})]::class[/]
+                ],[/][# th:if="${operation.haveBodyParameter()}"][# th:each="parameter:${operation.getParameters()}"][# th:if="${parameter.getIn()=='body'}"]
+                'json' => [(${parameter.getIn()=='body' && parameter.required==false ? "!$"+parameter.name+" ? [] : ":""})]$[(${parameter.name})]->toArray(),[/][/][/][# th:if="${operation.haveBodyPropertyParameter()}"]
+                'json' => [[# th:each="parameter:${operation.getParameters()}"][# th:if="${parameter.getIn()=='bodyProperty'}"]
+                    '[(${parameter.name})]' => $[(${parameter.name})],[/][/]
+                ],[/]
+            ][/][# th:if="${ operation.returnSchema.getType() == null }"],
+            [$this, '[(${ operation.returnIsArray ? "toArray" : ( config.getClassBySchema(operation.returnSchema) == "Page" ? "toPage" : "toEntity" ) })]'][/]
         );
     }
 

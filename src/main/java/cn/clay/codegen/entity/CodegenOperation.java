@@ -83,7 +83,7 @@ public class CodegenOperation {
                     int pos = tmpSchema.get$ref().lastIndexOf("/");
                     String name = Helper.camelize(tmpSchema.get$ref().substring(pos + 1), true);
                     parameters.add(new CodegenParameter(
-                            requestBody, tmpSchema, name,
+                            requestBody, tmpSchema, "body", name,
                             requestBody.getRequired() == null || requestBody.getRequired(),// 如果没有明确指定为 false，则理解是比填项
                             requestBody.getDescription()
                     ));
@@ -94,12 +94,10 @@ public class CodegenOperation {
                         Boolean required = (
                                 requestBody.getRequired() == null || requestBody.getRequired() // 如果没有明确指定为 false，则理解是比填项
                         ) && tmpSchema.getRequired() != null && tmpSchema.getRequired().contains(name);
-                        parameters.add(
-                                new CodegenParameter(
-                                        requestBody, propertySchema,
-                                        name, required, propertySchema.getDescription()
-                                )
-                        );
+                        parameters.add(new CodegenParameter(
+                                requestBody, propertySchema,
+                                "bodyProperty", name, required, propertySchema.getDescription()
+                        ));
                     }
                 }
             }
@@ -150,10 +148,31 @@ public class CodegenOperation {
                 '}';
     }
 
-    public Boolean containBodyParameters() {
+    public Boolean haveBodyParameter() {
         for (CodegenParameter parameter : getParameters()) {
-            if (Arrays.asList("body", "bodyProperty").contains(parameter.getIn()))
+            if (parameter.getIn().equals("body")) {
                 return true;
+            }
+        }
+
+        return false;
+    }
+
+    public Boolean haveBodyPropertyParameter() {
+        for (CodegenParameter parameter : getParameters()) {
+            if (parameter.getIn().equals("bodyProperty")) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public Boolean haveQueryParameter() {
+        for (CodegenParameter parameter : getParameters()) {
+            if (parameter.getIn().equals("query")) {
+                return true;
+            }
         }
 
         return false;

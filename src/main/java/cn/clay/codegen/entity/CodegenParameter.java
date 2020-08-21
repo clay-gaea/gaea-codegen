@@ -52,9 +52,9 @@ public class CodegenParameter {
      * 2. 如果是 allOf，转化为模板对象（举例 Page，已 list 属性为 T 类）
      * 3. 如果是 object，则根据 properties 生成对应的参数
      */
-    public CodegenParameter(RequestBody requestBody, Schema<?> schema, String name, Boolean required, String description) {
+    public CodegenParameter(RequestBody requestBody, Schema<?> schema, String in, String name, Boolean required, String description) {
         this.requestBody = requestBody;
-        this.init(schema, "bodyProperty", name, required, description);
+        this.init(schema, in, name, required, description);
     }
 
     public CodegenParameter(ApiResponses apiResponses) {
