@@ -32,7 +32,8 @@ class [(${api.getClassname()})]Client extends HttpClient implements [(${api.getC
                     '[(${parameter.name})]' => $[(${parameter.name})],[/][/]
                 ],[/]
             ][/][# th:if="${ operation.returnSchema.getType() == null }"],
-            [$this, '[(${ operation.returnIsArray ? "toArray" : ( config.getClassBySchema(operation.returnSchema) == "Page" ? "toPage" : "toEntity" ) })]'][/]
+            [$this, '[(${ operation.returnIsArray ? "toArray" : ( config.getClassBySchema(operation.returnSchema) == "Page" ? "toPage" : "toEntity" ) })]'],
+            [# th:if="${config.getBaseClassBySchema(operation.returnSchema)==''}"][(${config.getTemplateClassBySchema(operation.returnSchema)})][/][/]
         );
     }
 
