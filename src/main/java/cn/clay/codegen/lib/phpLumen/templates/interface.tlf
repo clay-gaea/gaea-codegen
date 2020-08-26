@@ -7,10 +7,10 @@ interface [(${api.getClassname()})]Interface
     /**
      * [(${operation.summary})][# th:each="parameter : ${operation.getParameters()}"]
      * @param $[(${parameter.name})] [(${config.getClassBySchema(parameter.schema)})][(${parameter.getIn()=='body' && parameter.required==false}?'|NULL':'')] [(${parameter.description})][/]
-     * @return [(${config.getClassBySchema(operation.returnSchema)})][(${operation.returnSchema.get$ref()!=null}?'|NULL':'')][# th:if="${operation.httpMethod.toString() == 'DELETE'}"]
+     * @return [(${config.getClassBySchema(operation.returnParameter.schema)})][# th:if="${operation.httpMethod.toString() == 'DELETE'}"]
      *
      * @throws \Exception[/]
      */
-    public function [(${operation.operationId})]([# th:each="parameter : ${operation.getParameters()}"][(${parameter.schema.get$ref!=null && parameter.required==false}?'?':'')][(${parameter.isArray()?'array':config.getClassBySchema(parameter.schema)})] $[(${parameter.name})][(${parameter.defaultVal!=null?" = " + parameter.defaultVal : ""})][(${parameterStat.last?"":", "})][/]): [(${operation.returnSchema.get$ref()!=null}?'?':'')][(${operation.returnIsArray?"array":config.getClassBySchema(operation.returnSchema)})];
+    public function [(${operation.operationId})]([# th:each="parameter : ${operation.getParameters()}"][(${parameter.schema.get$ref!=null && parameter.required==false}?'?':'')][(${config.getClassBySchema(parameter.schema)})] $[(${parameter.name})][(${parameter.defaultVal!=null?" = " + parameter.defaultVal : ""})][(${parameterStat.last?"":", "})][/]): [(${operation.returnParameter.required?'':'?'})][(${operation.returnParameter.isArray?"array":config.getClassBySchema(operation.returnParameter.schema)})];
 
 [/]}

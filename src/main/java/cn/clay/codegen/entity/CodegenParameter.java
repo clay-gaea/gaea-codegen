@@ -3,6 +3,7 @@ package cn.clay.codegen.entity;
 import cn.clay.codegen.Helper;
 import io.swagger.oas.models.media.ArraySchema;
 import io.swagger.oas.models.media.MediaType;
+import io.swagger.oas.models.media.ObjectSchema;
 import io.swagger.oas.models.media.Schema;
 import io.swagger.oas.models.parameters.Parameter;
 import io.swagger.oas.models.parameters.RequestBody;
@@ -24,6 +25,8 @@ public class CodegenParameter {
     public RequestBody requestBody;
     public ApiResponses apiResponses;
     public Schema<?> schema;
+    public Boolean isArray;
+    public Boolean isObject;
 
     /**
      * 目前仅支持 query 参数，每个参数映射一个变量
@@ -37,6 +40,12 @@ public class CodegenParameter {
         this.required = parameter.getRequired();
 
         this.schema = parameter.getSchema();
+
+        if (this.schema instanceof ArraySchema) {
+            this.isArray = true;
+        } else if (this.schema instanceof ObjectSchema) {
+            this.isObject = true;
+        }
 
         // path、query
         if (this.schema != null) {
@@ -71,6 +80,10 @@ public class CodegenParameter {
                     }
                 }
             }
+        }
+
+        if (this.schema == null) {
+            System.out.println("Warning: return parameter schema should be defined");
         }
     }
 

@@ -3,6 +3,7 @@ package cn.clay.codegen.lib.javaSpring;
 import cn.clay.codegen.lib.CodegenConfigJava;
 import cn.clay.codegen.entity.TemplateFile;
 import io.swagger.oas.models.OpenAPI;
+import io.swagger.oas.models.media.Schema;
 
 public class JavaSpringCodegenConfig extends CodegenConfigJava {
     public JavaSpringCodegenConfig(OpenAPI openAPI) {
@@ -30,5 +31,10 @@ public class JavaSpringCodegenConfig extends CodegenConfigJava {
     @Override
     public String getTemplateDir() {
         return "src/main/java/cn/clay/codegen/lib/javaSpring/templates";
+    }
+
+    @Override
+    public Schema<?> getTemplateSchema(Schema<?> schema) {
+        return null;
     }
 }

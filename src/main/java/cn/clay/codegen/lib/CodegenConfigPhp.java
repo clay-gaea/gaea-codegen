@@ -3,9 +3,7 @@ package cn.clay.codegen.lib;
 import cn.clay.codegen.Helper;
 import cn.clay.codegen.entity.*;
 import io.swagger.oas.models.OpenAPI;
-import io.swagger.oas.models.media.ArraySchema;
-import io.swagger.oas.models.media.ComposedSchema;
-import io.swagger.oas.models.media.Schema;
+import io.swagger.oas.models.media.*;
 
 import java.util.*;
 
@@ -39,108 +37,104 @@ public abstract class CodegenConfigPhp extends CodegenConfig {
     }
 
     @Override
-    public Map<String, Object> getApiScope(CodegenApi api) {
-        Map<String, Object> map = this.getScope();
-        map.put("api", api);
-        return map;
-    }
-
-    @Override
-    public Map<String, Object> getModelScope(CodegenModel model) {
-        Map<String, Object> map = this.getScope();
-        map.put("model", model);
-        return map;
-    }
-
     public List<String> getImportsBySchema(Schema<?> schema) {
         List<String> rt = new ArrayList<>();
-        if (schema.getType() != null) { // 基础类型
-            return rt;
+        String classname = getBaseClassBySchema(schema);
+        if (classname != null) return rt;
+
+        if (schema instanceof ArraySchema) {
+            rt.addAll(getImportsBySchema(((ArraySchema) schema).getItems()));
+        } else if (schema instanceof ComposedSchema) {
+            List<Schema> listAllOf = ((ComposedSchema) schema).getAllOf();
+            List<?> listOneOf = ((ComposedSchema) schema).getOneOf(); // 不允许有不确定类型
+            List<?> listAnyOf = ((ComposedSchema) schema).getAnyOf(); // 不允许有不确定类型
+            if (listAllOf == null) {
+                return rt;
+            } else if (listOneOf != null || listAnyOf != null) {
+                System.out.println("Warning OneOf&AnyOf not supported.");
+                return rt;
+            }
+
+            for (Schema<?> item : listAllOf) {
+                if (item.get$ref() != null && item.get$ref().endsWith("Page")) {
+                    rt.add(getGroupNamespace() + "\\Common\\Libs\\Page");
+                }
+            }
+        } else if (schema instanceof ObjectSchema) {
+            for (Map.Entry<String, Schema> entryProperty : schema.getProperties().entrySet()) {
+                rt.addAll(getImportsBySchema(entryProperty.getValue()));
+            }
+        } else if (schema.get$ref() != null) {
+            rt.add(getNamespace() + "\\Entity\\" + classname);
         }
 
-        String baseClass = getBaseClassBySchema(schema);
-        if (baseClass.equals("Page")) {
-            rt.add(getGroupNamespace() + "\\Common\\Libs\\Page");
-        } else {
-            rt.add(getNamespace() + "\\Entity\\" + baseClass);
-        }
         return rt;
     }
 
-    /**
-     * 获取模板类基本 class 类型
-     */
-    public String getTemplateClassBySchema(Schema<?> schema) {
-        String baseClass = getBaseClassBySchema(schema);
-        if (baseClass.equals("Page") && schema instanceof ComposedSchema) {
+    @Override
+    public String getBaseClassBySchema(Schema<?> schema) {
+        if (schema instanceof IntegerSchema) {
+            return "int";
+        } else if (schema.getType() == null) {
+            return null;
+        }
+
+        switch (schema.getType()) {
+            case "boolean":
+                return "bool";
+            case "string":
+                return "string";
+            case "integer":
+                return "int";
+            case "number":
+                return schema.getFormat().equals("float") || schema.getFormat().equals("double") ? "float" : "int";
+            case "array":
+                return null;
+            default:
+                System.out.println("Warning: getBaseClassBySchema " + schema.getType());
+                return null;
+        }
+    }
+
+    @Override
+    public Schema<?> getTemplateSchema(Schema<?> schema) {
+        if (schema instanceof ComposedSchema) {
             List<Schema> list3 = ((ComposedSchema) schema).getAllOf();
-            if (list3 != null && list3.get(list3.size() - 1).getProperties() != null && list3.get(list3.size() - 1).getProperties().containsKey("list")) {
-                return getBaseClassBySchema((Schema<?>) list3.get(list3.size() - 1).getProperties().get("list"));
+            if (list3 != null && list3.get(0).get$ref() != null && list3.get(0).get$ref().endsWith("Page")) {
+                Schema<?> listSchema =  (Schema<?>) list3.get(list3.size() - 1).getProperties().get("list");
+                if (listSchema != null && listSchema instanceof ArraySchema)
+                    return ((ArraySchema) listSchema).getItems();
+            } else {
+                System.out.println("Waring: getTemplateSchema" + schema);
             }
+        } else if (schema instanceof ArraySchema) {
+            return ((ArraySchema) schema).getItems();
         }
 
         return null;
     }
 
-    /**
-     * 通过 Schema 获取基础类型
-     *
-     * @param schema Schema
-     * @return String
-     */
-    public String getBaseClassBySchema(Schema<?> schema) {
-        if (schema instanceof ArraySchema) {
-            return getBaseClassBySchema(((ArraySchema) schema).getItems());
-        } else if (schema instanceof ComposedSchema) {
-            /*
-             * oneof/anyof 只取第一个返回
-             * allof 只取第一个返回
-             */
-            List<Schema> list1 = ((ComposedSchema) schema).getOneOf();
-            List<Schema> list2 = ((ComposedSchema) schema).getAnyOf();
-            List<Schema> list3 = ((ComposedSchema) schema).getAllOf();
+    @Override
+    public String getClassBySchema(Schema<?> schema) {
+        String baseClassname = getBaseClassBySchema(schema);
+        if (baseClassname != null) return baseClassname;
 
-            if (list1 != null) {
-                return getBaseClassBySchema(list1.get(0));
-            } else if (list2 != null) {
-                return getBaseClassBySchema(list2.get(0));
-            } else if (list3 != null) {
-                return getBaseClassBySchema(list3.get(0));
+        // 模板类
+        if (schema instanceof ArraySchema) {
+            return getClassBySchema(getTemplateSchema(schema)) + "[]";
+        } else if (schema instanceof ComposedSchema) {
+            List<Schema> list3 = ((ComposedSchema) schema).getAllOf();
+            if (list3 != null && list3.size() > 0 && list3.get(0).get$ref().endsWith("Page")) {
+                return "Page";
             } else {
-                System.out.println("Warning: getBaseClassBySchema " + schema);
-                return null;
+                System.out.println("Warning: getClassBySchema not supported." + schema);
             }
         } else if (schema.get$ref() != null) {
-            String $ref = schema.get$ref();
-            int pos = $ref.lastIndexOf("/");
-            return $ref.substring(pos + 1);
-        } else {
-            switch (schema.getType()) {
-                case "boolean":
-                    return "bool";
-                case "string":
-                    return "string";
-                case "integer":
-                    return "int";
-                case "number":
-                    return schema.getFormat().equals("float") || schema.getFormat().equals("double") ? "float" : "int";
-                case "array":
-                case "object":
-                default:
-                    System.out.println("Warning: getBaseClassBySchema " + schema);
-                    return "";
-            }
+            int pos = schema.get$ref().lastIndexOf("/");
+            return schema.get$ref().substring(pos + 1);
         }
-    }
 
-    /**
-     * 通过 Schema 获取类型
-     *
-     * @param schema Schema
-     * @return String
-     */
-    public String getClassBySchema(Schema<?> schema) {
-        String baseClass = getBaseClassBySchema(schema);
-        return schema instanceof ArraySchema ? baseClass + "[]" : baseClass;
+        System.out.println("Warning: getClassBySchema not supported." + schema);
+        return null;
     }
 }

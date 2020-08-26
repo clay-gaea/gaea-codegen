@@ -67,15 +67,22 @@ abstract class CodegenConfig {
         this.outputDir = outputDir;
     }
 
-    public abstract Map<String, Object> getScope();
+    abstract public Map<String, Object> getScope();
 
-    public abstract Map<String, Object> getApiScope(CodegenApi api);
+    public Map<String, Object> getApiScope(CodegenApi api) {
+        Map<String, Object> scope = this.getScope();
+        scope.put("api", api);
+        return scope;
+    }
 
-    public abstract Map<String, Object> getModelScope(CodegenModel model);
-
-    // groupId artifactId version
+    public Map<String, Object> getModelScope(CodegenModel model) {
+        Map<String, Object> scope = this.getScope();
+        scope.put("model", model);
+        return scope;
+    }
 
     protected void validate() {
+        // Spec 格式类型校验
     }
 
     protected String getVersion() {
@@ -191,13 +198,29 @@ abstract class CodegenConfig {
     }
 
     /**
-     * 获取参数 class 类型
+     * 通过 Schema 获取类型
+     *
+     * @param schema Schema
+     * @return String
      */
     abstract public String getClassBySchema(Schema<?> schema);
 
-    abstract public String getBaseClassBySchema(Schema<?> schema);
+    /**
+     * 获取模板类型的模板 Schema，如果非模板类则返回 null
+     *
+     * @param schema Schema
+     * @return Schema|null
+     */
+    abstract public Schema<?> getTemplateSchema(Schema<?> schema);
 
-    abstract public String getTemplateClassBySchema(Schema<?> schema);
+    public String getTemplateClass(Schema<?> schema) {
+        Schema<?> templateSchema = getTemplateSchema(schema);
+        if (templateSchema != null) {
+            return getClassBySchema(templateSchema);
+        }
+
+        return "";
+    }
 
     /**
      * 获取 imports 函数
@@ -221,12 +244,25 @@ abstract class CodegenConfig {
                 rt.addAll(getImportsBySchema(parameter.schema));
             }
 
-            rt.addAll(getImportsBySchema(operation.returnSchema));
+            rt.addAll(getImportsBySchema(operation.returnParameter.schema));
         }
 
         return rt.parallelStream().filter(item -> !item.isEmpty()).collect(Collectors.toList());
     }
 
-    // 通过参数 Schema, 获取依赖项
+    /**
+     * 通过 Schema 获取需要依赖的对象
+     *
+     * @param schema Schema
+     * @return List<String>
+     */
     abstract public List<String> getImportsBySchema(Schema<?> schema);
+
+    /**
+     * 通过 Schema 获取基础类型（数组、对象、$ref非基础类型）
+     *
+     * @param schema Schema
+     * @return String|NULL
+     */
+    abstract public String getBaseClassBySchema(Schema<?> schema);
 }

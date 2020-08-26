@@ -13,7 +13,7 @@ class [(${api.getClassname()})]Client extends HttpClient implements [(${api.getC
         '[(${operation.operationId})]' => ['method' => '[(${operation.httpMethod})]', 'path' => '[(${operation.path})]'],[/]
     ];
 [# th:each="operation : ${api.operations}"]
-    public function [(${operation.operationId})]([# th:each="parameter : ${operation.getParameters()}"][(${parameter.schema.get$ref!=null && parameter.required==false}?'?':'')][(${parameter.isArray()?'array':config.getClassBySchema(parameter.schema)})] $[(${parameter.name})][(${parameter.defaultVal!=null?" = " + parameter.defaultVal : ""})][(${parameterStat.last?"":", "})][/]): [(${operation.returnSchema.get$ref()!=null}?'?':'')][(${operation.returnIsArray?"array":config.getClassBySchema(operation.returnSchema)})]
+    public function [(${operation.operationId})]([# th:each="parameter : ${operation.getParameters()}"][(${parameter.schema.get$ref!=null && parameter.required==false}?'?':'')][(${parameter.isArray()?'array':config.getClassBySchema(parameter.schema)})] $[(${parameter.name})][(${parameter.defaultVal!=null?" = " + parameter.defaultVal : ""})][(${parameterStat.last?"":", "})][/]): [(${operation.returnParameter.required}?'':'?')][(${operation.returnParameter.isArray?"array":config.getClassBySchema(operation.returnParameter.schema)})]
     {
         return $this->[(${operation.operationId})]Async([# th:each="parameter : ${operation.getParameters()}"]$[(${parameter.name})][(${parameterStat.last?"":", "})][/])->wait();
     }
@@ -31,9 +31,10 @@ class [(${api.getClassname()})]Client extends HttpClient implements [(${api.getC
                 'json' => [[# th:each="parameter:${operation.getParameters()}"][# th:if="${parameter.getIn()=='bodyProperty'}"]
                     '[(${parameter.name})]' => $[(${parameter.name})],[/][/]
                 ],[/]
-            ][/][# th:if="${ operation.returnSchema.getType() == null }"],
-            [$this, '[(${ operation.returnIsArray ? "toArray" : ( config.getClassBySchema(operation.returnSchema) == "Page" ? "toPage" : "toEntity" ) })]'],
-            [# th:if="${config.getBaseClassBySchema(operation.returnSchema)==''}"][(${config.getTemplateClassBySchema(operation.returnSchema)})][/][/]
+            ][/][# th:if="${ operation.returnParameter.required && config.getBaseClassBySchema(operation.returnParameter.schema)==null }"],
+            // 需要转义
+            [$this, '[(${ operation.returnParameter.isArray ? "toArray" : ( config.getClassBySchema(operation.returnParameter.schema) == "Page" ? "toPage" : "toEntity" ) })]'][# th:if="${operation.returnParameter.schema.get$ref()!=null||(config.getTemplateSchema(operation.returnParameter.schema)!=null&&config.getBaseClassBySchema(config.getTemplateSchema(operation.returnParameter.schema))==null)}"],
+            [(${operation.returnParameter.schema.get$ref()!=null?config.getClassBySchema(operation.returnParameter.schema):config.getTemplateClass(operation.returnParameter.schema)})]::class[/][/]
         );
     }
 

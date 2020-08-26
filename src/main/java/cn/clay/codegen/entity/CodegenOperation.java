@@ -23,10 +23,6 @@ public class CodegenOperation {
     public String summary;
     public String description;
 
-    public Schema<?> returnSchema;
-    public String returnDescription;
-    public boolean returnIsArray;
-    // TODO 使用 Parameter 类代替
     public CodegenParameter returnParameter;
 
     List<CodegenParameter> parameters;
@@ -40,23 +36,7 @@ public class CodegenOperation {
         this.summary = operation.getSummary();
         this.description = operation.getDescription();
 
-        // 说明：必须有200返回（正确返回）,JSON返回
-        for (Map.Entry<String, ApiResponse> apiResponseEntry : operation.getResponses().entrySet()) {
-            if (apiResponseEntry.getKey().equals("200")) {
-                this.returnDescription = apiResponseEntry.getValue().getDescription();
-                for (Map.Entry<String, MediaType> mediaTypeEntry : apiResponseEntry.getValue().getContent().entrySet()) {
-                    if (mediaTypeEntry.getKey().equals("application/json")) {
-                        this.returnSchema = mediaTypeEntry.getValue().getSchema();
-                        this.returnIsArray = (this.returnSchema instanceof ArraySchema);
-                    }
-                }
-            }
-        }
         this.returnParameter = new CodegenParameter(operation.getResponses());
-
-        if (this.returnSchema == null) {
-            System.out.println("Warning: " + this.operationId + " return not defined");
-        }
     }
 
     public List<CodegenParameter> getParameters() {
