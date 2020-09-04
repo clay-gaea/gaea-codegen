@@ -15,7 +15,7 @@ public class [(${api.getClassname()})]Controller {
 [# th:each="operation : ${api.operations}"]
     @RequestMapping("[(${operation.path})]")
     @ResponseBody
-    public [(${config.getClassBySchema(operation.returnSchema)})] [(${operation.operationId})]([# th:each="parameter : ${operation.getParameters()}"][(${config.getClassBySchema(parameter.schema)})] [(${parameter.name})][(${parameterStat.last?"":", "})][/]) {
+    public [(${config.getClassBySchema(operation.returnParameter.schema)})] [(${operation.operationId})]([# th:each="parameter : ${operation.getParameters()}"][(${config.getClassBySchema(parameter.schema)})] [(${parameter.name})][(${parameterStat.last?"":", "})][/]) {
         return [(${api.getParamName()})]Service.[(${operation.operationId})]([# th:each="parameter : ${operation.getParameters()}"][(${parameter.name})][(${parameterStat.last?"":", "})][/]);
     }
 

@@ -3,11 +3,10 @@ package cn.clay.codegen.lib;
 import cn.clay.codegen.entity.TemplateFile;
 import cn.clay.codegen.entity.*;
 import io.swagger.oas.models.OpenAPI;
-import io.swagger.oas.models.media.ArraySchema;
-import io.swagger.oas.models.media.ComposedSchema;
-import io.swagger.oas.models.media.Schema;
+import io.swagger.oas.models.media.*;
 import org.thymeleaf.util.StringUtils;
 
+import javax.validation.constraints.Null;
 import java.io.File;
 import java.util.*;
 
@@ -50,92 +49,107 @@ public abstract class CodegenConfigJava extends CodegenConfig {
 
     @Override
     public String getClassBySchema(Schema<?> schema) {
-        return "";
-//        String baseClass = getBaseClassBySchema(schema);
-//        if (schema instanceof ArraySchema) {
-//            return "List<" + baseClass + ">";
-//        } else if (baseClass.equals("Page")) {
-//            String templateClass = getClassBySchema(getTemplateSchema(schema));
-//            return "Page<" + templateClass + ">";
-//        }
-//
-//        return baseClass;
+        String baseClassname = getBaseClassBySchema(schema);
+        if (baseClassname != null) return baseClassname;
+
+        // 模板类
+        if (schema instanceof ArraySchema) {
+            return "List<" + getClassBySchema(getTemplateSchema(schema)) + ">";
+        } else if (schema instanceof ComposedSchema) {
+            List<Schema> list3 = ((ComposedSchema) schema).getAllOf();
+            if (list3 != null && list3.size() > 0 && list3.get(0).get$ref().endsWith("Page")) {
+                return "Page<" + getClassBySchema(getTemplateSchema(schema)) + ">";
+            } else {
+                System.out.println("Warning: getClassBySchema not supported." + schema);
+            }
+        } else if (schema.get$ref() != null) {
+            int pos = schema.get$ref().lastIndexOf("/");
+            return schema.get$ref().substring(pos + 1);
+        }
+
+        System.out.println("Warning: getClassBySchema not supported." + schema);
+        return null;
     }
 
+    @Override
     public String getBaseClassBySchema(Schema<?> schema) {
-//        if (schema instanceof ArraySchema) {
-//            return getBaseClassBySchema(((ArraySchema) schema).getItems());
-//        } else if (schema instanceof ComposedSchema) {
-//            /*
-//             * oneof/anyof 只取第一个返回
-//             * allof 只取第一个返回
-//             */
-//            List<Schema> list1 = ((ComposedSchema) schema).getOneOf();
-//            List<Schema> list2 = ((ComposedSchema) schema).getAnyOf();
-//            List<Schema> list3 = ((ComposedSchema) schema).getAllOf();
-//
-//            if (list1 != null) {
-//                return getBaseClassBySchema(list1.get(0));
-//            } else if (list2 != null) {
-//                return getBaseClassBySchema(list2.get(0));
-//            } else if (list3 != null) {
-//                return getBaseClassBySchema(list3.get(0));
-//            } else {
-//                System.out.println("Warning: getBaseClassBySchema " + schema);
-//                return null;
-//            }
-//        } else if (schema.get$ref() != null) {
-//            String $ref = schema.get$ref();
-//            int pos = $ref.lastIndexOf("/");
-//            return $ref.substring(pos + 1);
-//        } else {
-        boolean bool = true;
+        if (schema instanceof IntegerSchema) {
+            return "Long";
+        } else if (schema.getType() == null) {
+            return null;
+        }
+
         switch (schema.getType()) {
             case "boolean":
                 return "Boolean";
             case "string":
                 return "String";
             case "integer":
-                return "Integer";
+                return "Long";
             case "number":
                 if (schema.getFormat().equals("float")) {
                     return "Float";
                 } else if (schema.getFormat().equals("double")) {
                     return "Double";
                 }
-            case "array":
-            case "object":
             default:
-                System.out.println("Warning: getBaseClassBySchema " + schema);
-                return "";
+                return null;
         }
-//        }
     }
 
-    protected Boolean isBaseType(String type) {
-        return Arrays.asList("Boolean", "String", "Integer").contains(type);
+    @Override
+    public Schema<?> getTemplateSchema(Schema<?> schema) {
+        if (schema instanceof ComposedSchema) {
+            List<Schema> list3 = ((ComposedSchema) schema).getAllOf();
+            if (list3 != null && list3.get(0).get$ref() != null && list3.get(0).get$ref().endsWith("Page")) {
+                Schema<?> listSchema = (Schema<?>) list3.get(list3.size() - 1).getProperties().get("list");
+                if (listSchema instanceof ArraySchema)
+                    return ((ArraySchema) listSchema).getItems();
+            } else {
+                System.out.println("Waring: getTemplateSchema" + schema);
+            }
+        } else if (schema instanceof ArraySchema) {
+            return ((ArraySchema) schema).getItems();
+        }
+
+        return null;
     }
 
     @Override
     public List<String> getImportsBySchema(Schema<?> schema) {
-        Set<String> rt = new HashSet<>();
+        List<String> rt = new ArrayList<>();
+        String classname = getBaseClassBySchema(schema);
+        if (classname != null) return rt;
 
-        String strClass = getClassBySchema(schema);
-        String baseClass = getClassBySchema(schema);
-        String templateClass = getClassBySchema(getTemplateSchema(schema));
-        if (strClass.startsWith("Page<")) {
-            rt.add(groupId + ".common.lib.Page");
-            rt.add(groupId + "." + StringUtils.replace(artifactId, "-", "_") + "." + "entity." + templateClass);
-        } else if (strClass.startsWith("List<")) {
+        if (schema instanceof ArraySchema) {
             rt.add("java.util.List");
-            if (!isBaseType(baseClass)) {
-                rt.add(groupId + "." + StringUtils.replace(artifactId, "-", "_") + "." + "entity." + baseClass);
+            rt.addAll(getImportsBySchema(((ArraySchema) schema).getItems()));
+        } else if (schema instanceof ComposedSchema) {
+            List<Schema> listAllOf = ((ComposedSchema) schema).getAllOf();
+            List<?> listOneOf = ((ComposedSchema) schema).getOneOf(); // 不允许有不确定类型
+            List<?> listAnyOf = ((ComposedSchema) schema).getAnyOf(); // 不允许有不确定类型
+            if (listAllOf == null) {
+                return rt;
+            } else if (listOneOf != null || listAnyOf != null) {
+                System.out.println("Warning OneOf&AnyOf not supported.");
+                return rt;
             }
-        } else if (!isBaseType(strClass)) {
-            rt.add(groupId + "." + StringUtils.replace(artifactId, "-", "_") + "." + "entity." + strClass);
+
+            for (Schema<?> item : listAllOf) {
+                if (item.get$ref() != null && item.get$ref().endsWith("Page")) {
+                    rt.add(groupId + ".common.lib.Page");
+                }
+            }
+        } else if (schema instanceof ObjectSchema) {
+            rt.add("java.util.Map");
+            for (Map.Entry<String, Schema> entryProperty : schema.getProperties().entrySet()) {
+                rt.addAll(getImportsBySchema(entryProperty.getValue()));
+            }
+        } else if (schema.get$ref() != null) {
+            rt.add(groupId + "." + StringUtils.replace(artifactId, "-", "_") + ".entity." + getClassBySchema(schema));
         }
 
-        return new ArrayList<>(rt);
+        return rt;
     }
 
     @Override

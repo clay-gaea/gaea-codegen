@@ -65,7 +65,7 @@ public abstract class CodegenConfigPhp extends CodegenConfig {
                 rt.addAll(getImportsBySchema(entryProperty.getValue()));
             }
         } else if (schema.get$ref() != null) {
-            rt.add(getNamespace() + "\\Entity\\" + classname);
+            rt.add(getNamespace() + "\\Entity\\" + getClassBySchema(schema));
         }
 
         return rt;
@@ -102,7 +102,7 @@ public abstract class CodegenConfigPhp extends CodegenConfig {
             List<Schema> list3 = ((ComposedSchema) schema).getAllOf();
             if (list3 != null && list3.get(0).get$ref() != null && list3.get(0).get$ref().endsWith("Page")) {
                 Schema<?> listSchema =  (Schema<?>) list3.get(list3.size() - 1).getProperties().get("list");
-                if (listSchema != null && listSchema instanceof ArraySchema)
+                if (listSchema instanceof ArraySchema)
                     return ((ArraySchema) listSchema).getItems();
             } else {
                 System.out.println("Waring: getTemplateSchema" + schema);

@@ -12,7 +12,7 @@ public class JavaSpringCodegenConfig extends CodegenConfigJava {
         templateFiles.add(new TemplateFile("pom.tlf", "pom.xml"));
 
         apiTemplateFiles.add(new TemplateFile("controller.tlf", "controller/", "", "Controller.java"));
-        apiTemplateFiles.add(new TemplateFile("service.tlf", "service/", "", "Service.java"));
+        apiTemplateFiles.add(new TemplateFile("service.tlf", "service/", "", "Interface.java"));
         apiTemplateFiles.add(new TemplateFile("client.tlf", "client/", "", "Client.java"));
 
         modelTemplateFiles.add(new TemplateFile("entity.tlf", "entity/", "", ".java"));
@@ -31,10 +31,5 @@ public class JavaSpringCodegenConfig extends CodegenConfigJava {
     @Override
     public String getTemplateDir() {
         return "src/main/java/cn/clay/codegen/lib/javaSpring/templates";
-    }
-
-    @Override
-    public Schema<?> getTemplateSchema(Schema<?> schema) {
-        return null;
     }
 }

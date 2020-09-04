@@ -1,0 +1,11 @@
+package [(${groupId})].[(${#strings.replace(artifactId, "-", "_")})].service;
+[# th:each="import : ${config.getImportsByApi(api)}"]
+import [(${import})];[/]
+
+// TODO 默认值支持
+public interface [(${api.getClassname()})]Interface {
+[# th:each="operation : ${api.operations}"]
+    // [(${operation.summary})]
+    public [(${config.getClassBySchema(operation.returnParameter.schema)})] [(${operation.operationId})]([# th:each="parameter : ${operation.getParameters()}"][(${config.getClassBySchema(parameter.schema)})] [(${parameter.name})][(${parameterStat.last?"":", "})][/]);
+
+[/]}

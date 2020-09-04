@@ -8,7 +8,7 @@ import [(${import})];[/]
 public class [(${api.getClassname()})]Client {
 [# th:each="operation : ${api.operations}"]
     // [(${operation.summary})]
-    public [(${config.getClassBySchema(operation.returnSchema)})] [(${operation.operationId})]([# th:each="parameter : ${operation.getParameters()}"][(${config.getClassBySchema(parameter.schema)})] [(${parameter.name})][(${parameterStat.last?"":", "})][/]) {
+    public [(${config.getClassBySchema(operation.returnParameter.schema)})] [(${operation.operationId})]([# th:each="parameter : ${operation.getParameters()}"][(${config.getClassBySchema(parameter.schema)})] [(${parameter.name})][(${parameterStat.last?"":", "})][/]) {
         return null;
     }
 

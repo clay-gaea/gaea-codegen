@@ -11,6 +11,7 @@ import io.swagger.oas.models.responses.ApiResponse;
 import io.swagger.oas.models.responses.ApiResponses;
 import v2.io.swagger.models.Response;
 
+import java.lang.reflect.Array;
 import java.util.Map;
 
 public class CodegenParameter {
@@ -34,25 +35,31 @@ public class CodegenParameter {
     public CodegenParameter(Parameter parameter) {
         this.parameter = parameter;
 
-        this.in = parameter.getIn();
-        this.name = parameter.getName();
-        this.description = parameter.getDescription();
-        this.required = parameter.getRequired();
+        this.init(parameter.getSchema(), parameter.getIn(), parameter.getName(), parameter.getRequired(), parameter.getDescription());
 
-        this.schema = parameter.getSchema();
-
-        if (this.schema instanceof ArraySchema) {
-            this.isArray = true;
-        } else if (this.schema instanceof ObjectSchema) {
-            this.isObject = true;
-        }
-
-        // path、query
         if (this.schema != null) {
             this.defaultVal = this.schema.getDefault() != null ? this.schema.getDefault().toString() : null;
-        } else {
-            System.out.println("Warning: CodegenParameter schema is null. " + parameter);
         }
+
+//        this.in = parameter.getIn();
+//        this.name = parameter.getName();
+//        this.description = parameter.getDescription();
+//        this.required = parameter.getRequired();
+//
+//        this.schema = parameter.getSchema();
+//
+//        if (this.schema instanceof ArraySchema) {
+//            this.isArray = true;
+//        } else if (this.schema instanceof ObjectSchema) {
+//            this.isObject = true;
+//        }
+//
+//        // path、query
+//        if (this.schema != null) {
+//            this.defaultVal = this.schema.getDefault() != null ? this.schema.getDefault().toString() : null;
+//        } else {
+//            System.out.println("Warning: CodegenParameter schema is null. " + parameter);
+//        }
     }
 
     /**
@@ -81,10 +88,6 @@ public class CodegenParameter {
                 }
             }
         }
-
-        if (this.schema == null) {
-            System.out.println("Warning: return parameter schema should be defined");
-        }
     }
 
     protected void init(Schema<?> schema, String in, String name, Boolean required, String description) {
@@ -94,6 +97,9 @@ public class CodegenParameter {
         this.required = required;
         this.description = description;
 
+        this.isArray = (this.schema instanceof ArraySchema);
+        this.isObject = (this.schema instanceof ObjectSchema);
+
         if (this.schema == null) {
             System.out.println("Warning: CodegenParameter[" + name + "] schema is null.");
         }
@@ -102,9 +108,5 @@ public class CodegenParameter {
     // thymeleaf 用 parameter.in 错误；用 parameter.getIn() 则正确
     public String getIn() {
         return in;
-    }
-
-    public Boolean isArray() {
-        return schema instanceof ArraySchema;
     }
 }

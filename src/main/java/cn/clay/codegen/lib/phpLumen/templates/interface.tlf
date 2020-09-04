@@ -11,6 +11,6 @@ interface [(${api.getClassname()})]Interface
      *
      * @throws \Exception[/]
      */
-    public function [(${operation.operationId})]([# th:each="parameter : ${operation.getParameters()}"][(${parameter.schema.get$ref!=null && parameter.required==false}?'?':'')][(${config.getClassBySchema(parameter.schema)})] $[(${parameter.name})][(${parameter.defaultVal!=null?" = " + parameter.defaultVal : ""})][(${parameterStat.last?"":", "})][/]): [(${operation.returnParameter.required?'':'?'})][(${operation.returnParameter.isArray?"array":config.getClassBySchema(operation.returnParameter.schema)})];
+    public function [(${operation.operationId})]([# th:each="parameter : ${operation.getParameters()}"][(${parameter.schema.get$ref!=null && parameter.required==false}?'?':'')][(${parameter.isArray?'array':config.getClassBySchema(parameter.schema)})] $[(${parameter.name})][(${parameter.defaultVal!=null?" = " + parameter.defaultVal : ""})][(${parameterStat.last?"":", "})][/]): [(${operation.returnParameter.required?'':'?'})][(${operation.returnParameter.isArray?"array":config.getClassBySchema(operation.returnParameter.schema)})];
 
 [/]}

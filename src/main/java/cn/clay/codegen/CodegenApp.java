@@ -13,55 +13,18 @@ import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.FileTemplateResolver;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.Map;
 
 public class CodegenApp {
 
-    // 读取json文件
-    protected static String readFile(String fileName) {
-        try {
-            File jsonFile = new File(fileName);
-            FileReader fileReader = new FileReader(jsonFile);
-            Reader reader = new InputStreamReader(new FileInputStream(jsonFile), StandardCharsets.UTF_8);
-            int ch;
-            StringBuilder sb = new StringBuilder();
-            while ((ch = reader.read()) != -1) {
-                sb.append((char) ch);
-            }
-            fileReader.close();
-            reader.close();
-            return sb.toString();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
     /**
-     * 1.通过 jar 加载配置包，命令行工具
-     * 2.加载 JSON/YAML 配置文件
-     * 3.解析成 OPENAPI SPEC 对象
-     * 4.通过模板生成对应的文件
-     * 5.钩子方法
+     * 1.命令行工具
+     * 2.通过模板生成对应的文件
+     * 3.钩子方法
      */
     public static void main(String[] args) {
         String pathJson = "src/main/resources/uac-simple-api.yaml";
-//        String pathYaml = "/Users/chenlei/Dev/Gaea/gaea-codegen/src/main/resources/uac-simple.yaml";
-
-        /*
-          加载文件
-          方式一：通过IO
-          方式二：Spring
-         */
-//        String str = readFile(pathJson);
-//        // 解析 JSON 字符串
-//        OpenAPI openAPI = JSON.parseObject(str, OpenAPI.class);
-//        OpenAPI openAPI = JSONObject.parseObject(str, OpenAPI.class);
-//        // 解析 YAML 字符串
-//        Yaml yaml = new Yaml();
-//        OpenAPI openAPI = yaml.loadAs(str, OpenAPI.class);
 
         OpenAPI openAPI = (new OpenAPIV3Parser()).read(pathJson);
         assert openAPI != null;
