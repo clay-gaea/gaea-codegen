@@ -1,18 +1,40 @@
-package cn.clay.codegen.lib;
+package cn.clay.codegen.lib.ts;
 
 import cn.clay.codegen.entity.TemplateFile;
-import cn.clay.codegen.entity.*;
+import cn.clay.codegen.lib.CodegenConfig;
 import io.swagger.oas.models.OpenAPI;
 import io.swagger.oas.models.media.*;
 import org.thymeleaf.util.StringUtils;
 
-import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-public abstract class CodegenConfigJava extends CodegenConfig {
-
-    public CodegenConfigJava(OpenAPI openAPI) {
+public class TSCodegenConfig extends CodegenConfig {
+    public TSCodegenConfig(OpenAPI openAPI) {
         super(openAPI);
+
+        templateFiles.add(new TemplateFile("package.tlf", "package.json"));
+
+        apiTemplateFiles.add(new TemplateFile("client.tlf", "client/", "", "Client.ts"));
+
+        modelTemplateFiles.add(new TemplateFile("entity.tlf", "entity/", "", ".ts"));
+    }
+
+    @Override
+    public String getKey() {
+        return "ts";
+    }
+
+    @Override
+    public String getDescription() {
+        return "template for typescript";
+    }
+
+    @Override
+    public String getTemplateDir() {
+        return "src/main/java/cn/clay/codegen/lib/ts/templates";
     }
 
     @Override
@@ -24,25 +46,12 @@ public abstract class CodegenConfigJava extends CodegenConfig {
         map.put("version", getVersion());
         map.put("description", this.openAPI.getInfo().getDescription());
         map.put("openAPI", openAPI);
-        map.put("groupNamespace", this.getGroupNamespace());
+//        map.put("namespace", getNamespace());
+//        map.put("groupNamespace", this.getGroupNamespace());
 
         map.put("apis", this.getApis());
         map.put("config", this);
 
-        return map;
-    }
-
-    @Override
-    public Map<String, Object> getApiScope(CodegenApi api) {
-        Map<String, Object> map = this.getScope();
-        map.put("api", api);
-        return map;
-    }
-
-    @Override
-    public Map<String, Object> getModelScope(CodegenModel model) {
-        Map<String, Object> map = this.getScope();
-        map.put("model", model);
         return map;
     }
 
@@ -53,7 +62,7 @@ public abstract class CodegenConfigJava extends CodegenConfig {
 
         // 模板类
         if (schema instanceof ArraySchema) {
-            return "List<" + getClassBySchema(getTemplateSchema(schema)) + ">";
+            return getClassBySchema(getTemplateSchema(schema)) + "[]";
         } else if (schema instanceof ComposedSchema) {
             List<Schema> list3 = ((ComposedSchema) schema).getAllOf();
             if (list3 != null && list3.size() > 0 && list3.get(0).get$ref().endsWith("Page")) {
@@ -71,39 +80,12 @@ public abstract class CodegenConfigJava extends CodegenConfig {
     }
 
     @Override
-    public String getBaseClassBySchema(Schema<?> schema) {
-        if (schema instanceof IntegerSchema) {
-            return "Long";
-        } else if (schema.getType() == null) {
-            return null;
-        }
-
-        switch (schema.getType()) {
-            case "boolean":
-                return "Boolean";
-            case "string":
-                return "String";
-            case "integer":
-                return "Long";
-            case "number":
-                if (schema.getFormat().equals("float")) {
-                    return "Float";
-                } else if (schema.getFormat().equals("double")) {
-                    return "Double";
-                }
-            default:
-                return null;
-        }
-    }
-
-    @Override
     public List<String> getImportsBySchema(Schema<?> schema) {
         List<String> rt = new ArrayList<>();
         String classname = getBaseClassBySchema(schema);
         if (classname != null) return rt;
 
         if (schema instanceof ArraySchema) {
-            rt.add("java.util.List");
             rt.addAll(getImportsBySchema(((ArraySchema) schema).getItems()));
         } else if (schema instanceof ComposedSchema) {
             List<Schema> listAllOf = ((ComposedSchema) schema).getAllOf();
@@ -118,28 +100,39 @@ public abstract class CodegenConfigJava extends CodegenConfig {
 
             for (Schema<?> item : listAllOf) {
                 if (item.get$ref() != null && item.get$ref().endsWith("Page")) {
-                    rt.add(groupId + ".common.lib.Page");
+                    rt.add(String.format("import Page from \"../../common/libs/page\""));
                 }
             }
         } else if (schema instanceof ObjectSchema) {
-            rt.add("java.util.Map");
             for (Map.Entry<String, Schema> entryProperty : schema.getProperties().entrySet()) {
                 rt.addAll(getImportsBySchema(entryProperty.getValue()));
             }
         } else if (schema.get$ref() != null) {
-            rt.add(groupId + "." + StringUtils.replace(artifactId, "-", "_") + ".entity." + getClassBySchema(schema));
+            String tmp = getClassBySchema(schema);
+            rt.add(String.format("import %s from \"../entity/%s\"", tmp, tmp));
         }
 
         return rt;
     }
 
     @Override
-    public String getApiFilePath(TemplateFile templateFile, CodegenApi api) {
-        return getOutputDir() + "/src/main/java/" + StringUtils.replace(groupId, ".", File.separator) + File.separator + StringUtils.replace(artifactId, "-", "_") + File.separator + templateFile.getPrefix() + templateFile.getOutput() + api.getClassname() + templateFile.getSuffix();
-    }
+    public String getBaseClassBySchema(Schema<?> schema) {
+        if (schema instanceof IntegerSchema) {
+            return "number";
+        } else if (schema.getType() == null) {
+            return null;
+        }
 
-    @Override
-    public String getModelFilePath(TemplateFile templateFile, CodegenModel model) {
-        return getOutputDir() + "/src/main/java/" + StringUtils.replace(groupId, ".", File.separator) + File.separator + StringUtils.replace(artifactId, "-", "_") + File.separator + templateFile.getPrefix() + templateFile.getOutput() + model.getClassname() + templateFile.getSuffix();
+        switch (schema.getType()) {
+            case "boolean":
+                return "boolean";
+            case "string":
+                return "string";
+            case "integer":
+            case "number":
+                return "number";
+            default:
+                return null;
+        }
     }
 }

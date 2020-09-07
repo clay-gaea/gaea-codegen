@@ -1,0 +1,6 @@
+[# th:each="import : ${config.getImportsByModel(model)}"][(${import})];
+[/]export default interface User {[# th:each="property : ${model.getProperties()}"]
+
+[# th:if="${property.description}"]    // [(${property.description})]
+[/]    [(${property.name})]?: [(${config.getClassBySchema(property.schema)})];
+[/]}

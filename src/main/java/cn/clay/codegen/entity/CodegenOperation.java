@@ -3,15 +3,14 @@ package cn.clay.codegen.entity;
 import cn.clay.codegen.Helper;
 import io.swagger.oas.models.Operation;
 import io.swagger.oas.models.PathItem;
-import io.swagger.oas.models.media.ArraySchema;
 import io.swagger.oas.models.media.MediaType;
 import io.swagger.oas.models.media.ObjectSchema;
 import io.swagger.oas.models.media.Schema;
 import io.swagger.oas.models.parameters.Parameter;
 import io.swagger.oas.models.parameters.RequestBody;
-import io.swagger.oas.models.responses.ApiResponse;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class CodegenOperation {
 
@@ -96,8 +95,8 @@ public class CodegenOperation {
                     if (p2.name.equals("id")) return 1;
 
                     // 默认值：有默认值放在后面
-                    if (p1.defaultVal == null ^ p2.defaultVal == null) {
-                        return p1.defaultVal == null ? -1 : 1;
+                    if (p1.haveDefault() ^ p2.haveDefault()) {
+                        return p1.haveDefault() ? -1 : 1;
                     }
 
                     // 参数类型：path < query < body
@@ -149,12 +148,14 @@ public class CodegenOperation {
     }
 
     public Boolean haveQueryParameter() {
-        for (CodegenParameter parameter : getParameters()) {
-            if (parameter.getIn().equals("query")) {
-                return true;
-            }
-        }
+        return !getQueryParameters().isEmpty();
+    }
 
-        return false;
+    public List<CodegenParameter> getQueryParameters() {
+        return getParameters().stream().filter(parameter -> parameter.getIn().equals("query")).collect(Collectors.toList());
+    }
+
+    public List<CodegenParameter> getBodyParameters() {
+        return getParameters().stream().filter(parameter -> parameter.getIn().startsWith("body")).collect(Collectors.toList());
     }
 }

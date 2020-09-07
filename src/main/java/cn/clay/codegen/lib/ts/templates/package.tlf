@@ -1,0 +1,16 @@
+{
+  "name": "[(${groupId})].[(${artifactId})]",
+  "version": "[(${version})]",
+  "description": "[(${description})]",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc"
+  },
+  "keywords": [
+    "[(${groupId})]", "[(${artifactId})]"
+  ],
+  "author": "itta163@163.com",
+  "license": "MIT",
+  "dependencies": {
+  }
+}

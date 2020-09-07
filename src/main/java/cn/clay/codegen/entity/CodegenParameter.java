@@ -1,6 +1,5 @@
 package cn.clay.codegen.entity;
 
-import cn.clay.codegen.Helper;
 import io.swagger.oas.models.media.ArraySchema;
 import io.swagger.oas.models.media.MediaType;
 import io.swagger.oas.models.media.ObjectSchema;
@@ -9,9 +8,7 @@ import io.swagger.oas.models.parameters.Parameter;
 import io.swagger.oas.models.parameters.RequestBody;
 import io.swagger.oas.models.responses.ApiResponse;
 import io.swagger.oas.models.responses.ApiResponses;
-import v2.io.swagger.models.Response;
 
-import java.lang.reflect.Array;
 import java.util.Map;
 
 public class CodegenParameter {
@@ -20,7 +17,6 @@ public class CodegenParameter {
     public String name;
     public Boolean required;
     public String description;
-    public String defaultVal;
 
     public Parameter parameter;
     public RequestBody requestBody;
@@ -34,32 +30,7 @@ public class CodegenParameter {
      */
     public CodegenParameter(Parameter parameter) {
         this.parameter = parameter;
-
         this.init(parameter.getSchema(), parameter.getIn(), parameter.getName(), parameter.getRequired(), parameter.getDescription());
-
-        if (this.schema != null) {
-            this.defaultVal = this.schema.getDefault() != null ? this.schema.getDefault().toString() : null;
-        }
-
-//        this.in = parameter.getIn();
-//        this.name = parameter.getName();
-//        this.description = parameter.getDescription();
-//        this.required = parameter.getRequired();
-//
-//        this.schema = parameter.getSchema();
-//
-//        if (this.schema instanceof ArraySchema) {
-//            this.isArray = true;
-//        } else if (this.schema instanceof ObjectSchema) {
-//            this.isObject = true;
-//        }
-//
-//        // path、query
-//        if (this.schema != null) {
-//            this.defaultVal = this.schema.getDefault() != null ? this.schema.getDefault().toString() : null;
-//        } else {
-//            System.out.println("Warning: CodegenParameter schema is null. " + parameter);
-//        }
     }
 
     /**
@@ -108,5 +79,9 @@ public class CodegenParameter {
     // thymeleaf 用 parameter.in 错误；用 parameter.getIn() 则正确
     public String getIn() {
         return in;
+    }
+
+    public Boolean haveDefault() {
+        return this.schema.getDefault() != null || (requestBody != null && !required);
     }
 }

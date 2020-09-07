@@ -6,6 +6,8 @@ import cn.clay.codegen.entity.*;
 import io.swagger.oas.models.OpenAPI;
 import io.swagger.oas.models.Operation;
 import io.swagger.oas.models.PathItem;
+import io.swagger.oas.models.media.ArraySchema;
+import io.swagger.oas.models.media.ComposedSchema;
 import io.swagger.oas.models.media.Schema;
 import io.swagger.oas.models.tags.Tag;
 import org.thymeleaf.util.StringUtils;
@@ -14,12 +16,12 @@ import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
-abstract class CodegenConfig {
-    OpenAPI openAPI;
+public abstract class CodegenConfig {
+    protected OpenAPI openAPI;
 
     // groupId artifactId
-    String groupId = "com.clay";
-    String artifactId = "";
+    protected String groupId = "com.clay";
+    protected String artifactId = "";
     private String outputDir = "";
 
     List<CodegenApi> apis = null;
@@ -125,15 +127,6 @@ abstract class CodegenConfig {
         return false;
     }
 
-//    public List<Tag> getTags() {
-//        if (this.openAPI == null) return new ArrayList<>();
-//        List<Tag> listTag = this.openAPI.getTags();
-//        if (this.haveDefaultTags()) {
-//            listTag.add(Helper.defaultTag());
-//        }
-//        return listTag;
-//    }
-
     public String getGroupNamespace() {
         return "Com\\Clay";
     }
@@ -211,7 +204,23 @@ abstract class CodegenConfig {
      * @param schema Schema
      * @return Schema|null
      */
-    abstract public Schema<?> getTemplateSchema(Schema<?> schema);
+    public Schema<?> getTemplateSchema(Schema<?> schema) {
+        if (schema instanceof ComposedSchema) {
+            List<Schema> list3 = ((ComposedSchema) schema).getAllOf();
+            if (list3 != null && list3.get(0).get$ref() != null && list3.get(0).get$ref().endsWith("Page")) {
+                Schema<?> listSchema = (Schema<?>) list3.get(list3.size() - 1).getProperties().get("list");
+                if (listSchema instanceof ArraySchema)
+                    return ((ArraySchema) listSchema).getItems();
+            } else {
+                System.out.println("Waring: getTemplateSchema" + schema);
+            }
+        } else if (schema instanceof ArraySchema) {
+            return ((ArraySchema) schema).getItems();
+        }
+
+        return null;
+
+    }
 
     public String getTemplateClass(Schema<?> schema) {
         Schema<?> templateSchema = getTemplateSchema(schema);
@@ -265,4 +274,14 @@ abstract class CodegenConfig {
      * @return String|NULL
      */
     abstract public String getBaseClassBySchema(Schema<?> schema);
+
+    public String getParameterDefaultVal(CodegenParameter parameter) {
+        if (parameter.schema.getDefault() != null) {
+            return parameter.schema.getDefault().toString();
+        } else if (parameter.requestBody != null && parameter.required != null && !parameter.required) {
+            return "null";
+        } else {
+            return "";
+        }
+    }
 }

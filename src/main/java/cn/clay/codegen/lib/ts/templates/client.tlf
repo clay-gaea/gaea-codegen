@@ -1,0 +1,14 @@
+import {getRequestMethod} from '../../common/libs/request';[# th:each="import : ${config.getImportsByApi(api)}"]
+[(${import})];
+[/]
+const request = getRequestMethod('uac-service');[# th:each="operation : ${api.operations}"]
+
+export async function [(${operation.operationId})]([# th:each="parameter : ${operation.getParameters()}"][(${parameter.name})]: [(${config.getClassBySchema(parameter.schema)})][(${parameter.haveDefault()?" = "+config.getParameterDefaultVal(parameter):""})][(${parameterStat.last?"":", "})][/]): Promise<[(${config.getClassBySchema(operation.returnParameter.schema)})]> {
+    return request('[(${operation.path})]', {
+        method: '[(${operation.httpMethod})]',[# th:if="${operation.haveQueryParameter()}"]
+        params: { [# th:each="parameter : ${operation.getQueryParameters()}"][(${parameter.name})][(${parameterStat.last?"":", "})][/] },[/][# th:if="${operation.getBodyParameters().size() == 1}"]
+        body: [(${operation.getBodyParameters().get(0).name})],[/][# th:if="${operation.getBodyParameters().size() > 1}"]
+        body: { [# th:each="parameter : ${operation.getBodyParameters()}"][(${parameter.name})][(${parameterStat.last?"":", "})][/] }[/]
+    });
+}
+[/]

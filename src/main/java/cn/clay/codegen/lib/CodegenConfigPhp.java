@@ -1,7 +1,6 @@
 package cn.clay.codegen.lib;
 
 import cn.clay.codegen.Helper;
-import cn.clay.codegen.entity.*;
 import io.swagger.oas.models.OpenAPI;
 import io.swagger.oas.models.media.*;
 
@@ -94,24 +93,6 @@ public abstract class CodegenConfigPhp extends CodegenConfig {
                 System.out.println("Warning: getBaseClassBySchema " + schema.getType());
                 return null;
         }
-    }
-
-    @Override
-    public Schema<?> getTemplateSchema(Schema<?> schema) {
-        if (schema instanceof ComposedSchema) {
-            List<Schema> list3 = ((ComposedSchema) schema).getAllOf();
-            if (list3 != null && list3.get(0).get$ref() != null && list3.get(0).get$ref().endsWith("Page")) {
-                Schema<?> listSchema =  (Schema<?>) list3.get(list3.size() - 1).getProperties().get("list");
-                if (listSchema instanceof ArraySchema)
-                    return ((ArraySchema) listSchema).getItems();
-            } else {
-                System.out.println("Waring: getTemplateSchema" + schema);
-            }
-        } else if (schema instanceof ArraySchema) {
-            return ((ArraySchema) schema).getItems();
-        }
-
-        return null;
     }
 
     @Override
