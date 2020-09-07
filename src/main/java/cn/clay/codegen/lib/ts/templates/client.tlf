@@ -7,8 +7,8 @@ export async function [(${operation.operationId})]([# th:each="parameter : ${ope
     return request('[(${operation.path})]', {
         method: '[(${operation.httpMethod})]',[# th:if="${operation.haveQueryParameter()}"]
         params: { [# th:each="parameter : ${operation.getQueryParameters()}"][(${parameter.name})][(${parameterStat.last?"":", "})][/] },[/][# th:if="${operation.getBodyParameters().size() == 1}"]
-        body: [(${operation.getBodyParameters().get(0).name})],[/][# th:if="${operation.getBodyParameters().size() > 1}"]
-        body: { [# th:each="parameter : ${operation.getBodyParameters()}"][(${parameter.name})][(${parameterStat.last?"":", "})][/] }[/]
+        data: [(${operation.getBodyParameters().get(0).name})],[/][# th:if="${operation.getBodyParameters().size() > 1}"]
+        data: { [# th:each="parameter : ${operation.getBodyParameters()}"][(${parameter.name})][(${parameterStat.last?"":", "})][/] }[/]
     });
 }
 [/]
