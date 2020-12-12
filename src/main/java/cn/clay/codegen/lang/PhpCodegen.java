@@ -1,23 +1,19 @@
-package cn.clay.codegen;
+package cn.clay.codegen.lang;
 
+import cn.clay.codegen.lib.Codegen;
+import cn.clay.codegen.lib.CodegenParams;
+import cn.clay.codegen.lib.Helper;
 import cn.clay.codegen.entity.*;
-import com.fasterxml.jackson.databind.util.ArrayBuilders;
-import com.google.common.collect.Collections2;
 import io.swagger.oas.models.OpenAPI;
 import io.swagger.oas.models.media.ArraySchema;
 import io.swagger.oas.models.media.ComposedSchema;
-import io.swagger.oas.models.media.MediaType;
 import io.swagger.oas.models.media.Schema;
-import io.swagger.oas.models.parameters.Parameter;
-import io.swagger.oas.models.parameters.RequestBody;
 
-import java.security.cert.Certificate;
 import java.util.*;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-public abstract class CodegenConfigPhp extends CodegenConfig {
-    public CodegenConfigPhp(OpenAPI openAPI) {
+public abstract class CodegenPhp extends Codegen {
+    public CodegenPhp(OpenAPI openAPI) {
         super(openAPI);
 
         this.artifactId = this.openAPI.getInfo().getTitle().toLowerCase();
@@ -53,7 +49,7 @@ public abstract class CodegenConfigPhp extends CodegenConfig {
     }
 
     @Override
-    public Map<String, Object> getModelScope(CodegenModel model) {
+    public Map<String, Object> getModelScope(CodegenEntity model) {
         Map<String, Object> map = this.getScope();
         map.put("model", model);
         return map;
@@ -67,7 +63,7 @@ public abstract class CodegenConfigPhp extends CodegenConfig {
             return $ref.substring(lastIndex + 1);
         } else if (schema instanceof ComposedSchema) {
             if (((ComposedSchema) schema).getOneOf() != null) {
-                return ((ComposedSchema) schema).getOneOf().stream().map(this::getSchemaClassName).filter(one -> !one.isBlank()).collect(Collectors.joining("|"));
+                return ((ComposedSchema) schema).getOneOf().stream().map(this::getSchemaClassName)/*.filter(one -> !one.isBlank())*/.collect(Collectors.joining("|"));
             } else if (((ComposedSchema) schema).getAllOf() != null && !((ComposedSchema) schema).getAllOf().isEmpty()) {
                 return getSchemaClassName(((ComposedSchema) schema).getAllOf().get(0));
             } else {
@@ -122,7 +118,7 @@ public abstract class CodegenConfigPhp extends CodegenConfig {
      * @param model CodegenModel
      * @return List<String>
      */
-    public List<String> getImportsByModel(CodegenModel model) {
+    public List<String> getImportsByModel(CodegenEntity model) {
         List<String> rt = new ArrayList<>();
 
         for (CodegenProperty property : model.getProperties()) {
