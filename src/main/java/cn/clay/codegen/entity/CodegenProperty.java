@@ -9,13 +9,6 @@ public class CodegenProperty {
     public String title;
     public String description;
 
-//    public String type;
-//    public String format;
-//    public String isArray;
-//    public String isObject;
-//    public boolean isModel;
-//    public CodegenModel model = null;
-
     public CodegenProperty(Schema<?> schema) {
         this.schema = schema;
 

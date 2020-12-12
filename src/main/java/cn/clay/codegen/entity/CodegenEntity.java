@@ -1,6 +1,6 @@
 package cn.clay.codegen.entity;
 
-import cn.clay.codegen.Helper;
+import cn.clay.codegen.lib.Helper;
 import io.swagger.oas.models.media.Schema;
 
 import java.util.ArrayList;
@@ -8,9 +8,19 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * todo：1.ClassName2.Namespace 3.文件路径
+ * TODO：1.ClassName2.Namespace 3.文件路径
+ * TODO：
+ *  1. components.schemas 对应 Entity
+ *  2. components.responses 是否需要表示
+ *  3. components.parameters 是否需要表示
+ *  4. components.examples 是否需要表示
+ *  5. components.requestBodies 是否需要表示
+ *  6. components.headers 是否需要表示
+ *  7. components.securitySchemes
+ *  8. components.links
+ *  9. components.callbacks
  */
-public class CodegenModel extends CodegenEntity {
+public class CodegenEntity {
     public Schema<?> schema;
 
     // 基本属性，以后有需要在拓展
@@ -20,7 +30,7 @@ public class CodegenModel extends CodegenEntity {
 
     List<CodegenProperty> properties = null; // 按需加载
 
-    public CodegenModel(Schema<?> schema) {
+    public CodegenEntity(Schema<?> schema) {
         this.schema = schema;
 
         this.name = schema.getName();
@@ -28,7 +38,7 @@ public class CodegenModel extends CodegenEntity {
         this.description = schema.getDescription();
     }
 
-    public CodegenModel(Schema<?> schema, String name) {
+    public CodegenEntity(Schema<?> schema, String name) {
         this.schema = schema;
 
         this.name = schema.getName();

@@ -8,7 +8,7 @@ package cn.clay.codegen.lib;
  * 4. 定义 key
  * 5. 可以考虑，配置和定义对象拆分
  */
-public abstract class CodegenParams {
+public abstract class CodegenConfig {
 
     // groupId 属于全局配置；artifactId 则是目标属性
     protected String groupId = "cn.clay";
@@ -16,6 +16,7 @@ public abstract class CodegenParams {
     protected String oasFile = "./oas.yaml"; // 设置默认值
     protected String outputDir = "./";
     protected String codegenKey = ""; // 必填项
+    protected String jar = ""; // 拓展用 jar 包
 
     public String getGroupId() {
         return groupId;
@@ -49,7 +50,7 @@ public abstract class CodegenParams {
         this.codegenKey = codegenKey;
     }
 
-    public CodegenParams() {
+    public CodegenConfig() {
     }
 
 //    public boolean haveDefaultTags() {

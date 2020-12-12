@@ -1,6 +1,4 @@
-package cn.clay.codegen;
-
-import java.io.File;
+package cn.clay.codegen.lib;
 
 public class TemplateFile {
     protected String template = "";
@@ -11,6 +9,12 @@ public class TemplateFile {
     public TemplateFile(String template, String output) {
         this.template = template;
         this.output = output;
+    }
+
+    public TemplateFile(String template, String output, String prefix) {
+        this.template = template;
+        this.output = output;
+        this.prefix = prefix;
     }
 
     public TemplateFile(String template, String output, String prefix, String suffix) {
@@ -24,31 +28,19 @@ public class TemplateFile {
         return template;
     }
 
-    public void setTemplate(String template) {
-        this.template = template;
-    }
-
     public String getOutput() {
         return output;
-    }
-
-    public void setOutput(String output) {
-        this.output = output;
     }
 
     public String getPrefix() {
         return prefix;
     }
 
-    public void setPrefix(String prefix) {
-        this.prefix = prefix;
-    }
-
     public String getSuffix() {
         return suffix;
     }
 
-    public void setSuffix(String suffix) {
-        this.suffix = suffix;
+    public String getLastOutput() {
+        return this.prefix + this.output + this.suffix;
     }
 }

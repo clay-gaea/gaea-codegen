@@ -1,2 +1,7 @@
-package cn.clay.codegen;public class CodegenCommand {
+package cn.clay.codegen;
+
+public class CodegenCommand {
+
+
+
 }

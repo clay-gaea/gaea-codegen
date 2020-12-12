@@ -1,2 +1,4 @@
-package PACKAGE_NAME;public class CodegenParams {
+package cn.clay.codegen;
+
+public class CodegenParams {
 }

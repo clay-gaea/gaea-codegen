@@ -1,6 +1,6 @@
 package cn.clay.codegen.entity;
 
-import cn.clay.codegen.Helper;
+import cn.clay.codegen.lib.Helper;
 import io.swagger.oas.models.media.MediaType;
 import io.swagger.oas.models.media.Schema;
 import io.swagger.oas.models.parameters.Parameter;

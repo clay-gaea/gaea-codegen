@@ -1,7 +1,7 @@
 package cn.clay.codegen.lang;
 
 import cn.clay.codegen.lib.Codegen;
-import cn.clay.codegen.lib.CodegenParams;
+import cn.clay.codegen.lib.CodegenConfig;
 import cn.clay.codegen.lib.Helper;
 import cn.clay.codegen.entity.*;
 import io.swagger.oas.models.OpenAPI;
@@ -12,47 +12,10 @@ import io.swagger.oas.models.media.Schema;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public abstract class CodegenPhp extends Codegen {
-    public CodegenPhp(OpenAPI openAPI) {
-        super(openAPI);
+public abstract class PhpCodegen extends Codegen {
 
-        this.artifactId = this.openAPI.getInfo().getTitle().toLowerCase();
-    }
-
-    public String getNamespace() {
-        return this.getGroupNamespace() + "\\" + Helper.camelize(this.artifactId, false);
-    }
-
-    @Override
-    public Map<String, Object> getScope() {
-        Map<String, Object> map = new HashMap<>();
-
-        map.put("groupId", groupId);
-        map.put("artifactId", artifactId);
-        map.put("version", getVersion());
-        map.put("description", this.openAPI.getInfo().getDescription());
-        map.put("namespace", getNamespace());
-        map.put("openAPI", openAPI);
-        map.put("groupNamespace", this.getGroupNamespace());
-
-        map.put("apis", this.getApis());
-        map.put("config", this);
-
-        return map;
-    }
-
-    @Override
-    public Map<String, Object> getApiScope(CodegenApi api) {
-        Map<String, Object> map = this.getScope();
-        map.put("api", api);
-        return map;
-    }
-
-    @Override
-    public Map<String, Object> getModelScope(CodegenEntity model) {
-        Map<String, Object> map = this.getScope();
-        map.put("model", model);
-        return map;
+    public PhpCodegen(CodegenConfig config) {
+        super(config);
     }
 
     public String getSchemaClassName(Schema<?> schema) {
@@ -88,7 +51,7 @@ public abstract class CodegenPhp extends Codegen {
     public List<String> getSchemaImports(Schema<?> schema) {
         List<String> rtList = new ArrayList<>();
         if (schema.get$ref() != null) {
-            rtList.add(this.getNamespace() + "\\Entity\\" + getSchemaClassName(schema));
+            rtList.add(/*this.getNamespace() + */"\\Entity\\" + getSchemaClassName(schema));
         } else if (schema instanceof ComposedSchema) {
             for (Schema<?> one : ((ComposedSchema) schema).getOneOf()) {
                 rtList.addAll(this.getSchemaImports(one));
@@ -145,7 +108,7 @@ public abstract class CodegenPhp extends Codegen {
             if (schema.get$ref() == null) {
                 continue;
             }
-            rt.add(getNamespace() + "\\Entity\\" + getBaseType(schema));
+            rt.add(/*getNamespace() + */"\\Entity\\" + getBaseType(schema));
         }
         return rt;
     }

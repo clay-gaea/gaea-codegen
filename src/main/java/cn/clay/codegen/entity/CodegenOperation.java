@@ -1,6 +1,5 @@
 package cn.clay.codegen.entity;
 
-import cn.clay.codegen.Helper;
 import io.swagger.oas.models.Operation;
 import io.swagger.oas.models.PathItem;
 import io.swagger.oas.models.media.MediaType;
@@ -11,6 +10,9 @@ import io.swagger.oas.models.responses.ApiResponse;
 
 import java.util.*;
 
+/**
+ * @deprecated CodegenApi 应该能够替换
+ */
 public class CodegenOperation {
 
     public Operation operation;

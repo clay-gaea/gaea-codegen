@@ -1,4 +1,4 @@
-.idea
-dist
-target
+.idea/
+dist/
+target/
 *.iml
