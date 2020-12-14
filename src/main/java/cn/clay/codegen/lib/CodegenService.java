@@ -1,4 +1,4 @@
-package cn.clay.codegen;
+package cn.clay.codegen.lib;
 
 /**
  * 1. 通过本地文件转换（支持相对路径和绝对路径）

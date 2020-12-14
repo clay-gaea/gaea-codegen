@@ -2,12 +2,10 @@ package cn.clay.codegen.lang;
 
 import cn.clay.codegen.lib.Codegen;
 import cn.clay.codegen.lib.CodegenConfig;
-import cn.clay.codegen.lib.Helper;
 import cn.clay.codegen.entity.*;
-import io.swagger.oas.models.OpenAPI;
-import io.swagger.oas.models.media.ArraySchema;
-import io.swagger.oas.models.media.ComposedSchema;
-import io.swagger.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.*;
 import java.util.stream.Collectors;

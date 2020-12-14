@@ -1,6 +1,6 @@
 package cn.clay.codegen.entity;
 
-import io.swagger.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.Schema;
 
 public class CodegenProperty {
     public Schema<?> schema;

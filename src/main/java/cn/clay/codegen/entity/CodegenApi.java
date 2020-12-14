@@ -1,7 +1,7 @@
 package cn.clay.codegen.entity;
 
 import cn.clay.codegen.lib.Helper;
-import io.swagger.oas.models.tags.Tag;
+import io.swagger.v3.oas.models.tags.Tag;
 
 import java.util.List;
 

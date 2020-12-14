@@ -1,4 +1,4 @@
-package cn.clay.codegen;
+package cn.clay.codegen.lib;
 
 public class CodegenImpl implements CodegenService {
     @Override

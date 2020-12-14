@@ -1,7 +1,7 @@
 package cn.clay.codegen.entity;
 
 import cn.clay.codegen.lib.Helper;
-import io.swagger.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.ArrayList;
 import java.util.List;

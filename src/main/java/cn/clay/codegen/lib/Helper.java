@@ -1,9 +1,11 @@
 package cn.clay.codegen.lib;
 
-import io.swagger.oas.models.tags.Tag;
+import io.swagger.v3.oas.models.tags.Tag;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+
+import static org.yaml.snakeyaml.tokens.Token.ID.Tag;
 
 public class Helper {
     protected static Tag defaultTag;
