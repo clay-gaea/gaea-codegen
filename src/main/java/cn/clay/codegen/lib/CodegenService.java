@@ -6,5 +6,5 @@ package cn.clay.codegen.lib;
  * 3. 支持 IOStream 转换
  */
 public interface CodegenService {
-    public void generateWithFilePath(CodegenParams params);
+    public void generate(CodegenConfig config);
 }

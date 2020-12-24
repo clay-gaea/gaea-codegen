@@ -8,6 +8,7 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.tags.Tag;
+import io.swagger.v3.parser.OpenAPIV3Parser;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.templatemode.TemplateMode;
@@ -51,7 +52,9 @@ public abstract class Codegen {
     abstract protected List<String> getSchemaImports(Schema<?> schema);
 
     protected void initOpenAPI() {
-        // 通过配置获取openAPI
+        // 通过配置获取openAPI, 支持url和本地地址方式
+        String input = config.getInput();
+        openAPI = (new OpenAPIV3Parser()).read(input);
     }
 
     final protected String getTemplateFilePath(TemplateFile templateFile) {

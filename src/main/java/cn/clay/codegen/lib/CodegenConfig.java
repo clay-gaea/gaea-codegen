@@ -8,15 +8,40 @@ package cn.clay.codegen.lib;
  * 4. 定义 key
  * 5. 可以考虑，配置和定义对象拆分
  */
-public abstract class CodegenConfig {
+public class CodegenConfig {
 
     // groupId 属于全局配置；artifactId 则是目标属性
+
+    protected String key = ""; // 必填项
+    protected String input = "./oas.yaml"; // 设置默认值
+    protected String output = "./oas-{version}"; // 仅对命令行起作用
     protected String groupId = "cn.clay";
     protected String artifactId = "oas";
-    protected String oasFile = "./oas.yaml"; // 设置默认值
-    protected String outputDir = "./";
-    protected String codegenKey = ""; // 必填项
     protected String jar = ""; // 拓展用 jar 包
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public String getInput() {
+        return input;
+    }
+
+    public void setInput(String input) {
+        this.input = input;
+    }
+
+    public String getOutput() {
+        return output;
+    }
+
+    public void setOutput(String output) {
+        this.output = output;
+    }
 
     public String getGroupId() {
         return groupId;
@@ -34,26 +59,15 @@ public abstract class CodegenConfig {
         this.artifactId = artifactId;
     }
 
-    public String getOasFile() {
-        return oasFile;
+    public String getJar() {
+        return jar;
     }
 
-    public void setOasFile(String oasFile) {
-        this.oasFile = oasFile;
+    public void setJar(String jar) {
+        this.jar = jar;
     }
 
-    public String getCodegenKey() {
-        return codegenKey;
-    }
-
-    public void setCodegenKey(String codegenKey) {
-        this.codegenKey = codegenKey;
-    }
-
-    public CodegenConfig() {
-    }
-
-//    public boolean haveDefaultTags() {
+    //    public boolean haveDefaultTags() {
 //        if (this.openAPI == null) return false;
 //        List<Tag> listTag = this.openAPI.getTags();
 //        for (Map.Entry<String, PathItem> next : this.openAPI.getPaths().entrySet()) {
@@ -66,22 +80,5 @@ public abstract class CodegenConfig {
 //            }
 //        }
 //        return false;
-//    }
-
-
-//    public String getFilePath(TemplateFile templateFile) {
-//        return getOutputDir() + File.separator + File.separator + templateFile.getOutput();
-//    }
-//
-//    public String getApiFilePath(TemplateFile templateFile, CodegenApi api) {
-//        return getOutputDir() + File.separator + templateFile.getPrefix() + templateFile.getOutput() + api.getClassname() + templateFile.getSuffix();
-//    }
-//
-//    public String getModelFilePath(TemplateFile templateFile, CodegenEntity model) {
-//        return getOutputDir() + File.separator + templateFile.getPrefix() + templateFile.getOutput() + model.getClassname() + templateFile.getSuffix();
-//    }
-//
-//    final public String getTemplatePath(TemplateFile templateFile) {
-//        return getTemplateDir() + File.separator + templateFile.getTemplate();
 //    }
 }

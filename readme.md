@@ -6,3 +6,4 @@
 - http://www.thymeleaf.org
 - http://www.snakeyaml.org
 - https://github.com/alibaba/fastjson/wiki/Quick-Start-CN
+- Spring Shell：https://cloud.tencent.com/developer/article/1451631
